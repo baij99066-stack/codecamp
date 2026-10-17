@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>码上学 CodeCamp · 主流编程语言学习平台</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23162A4A'/%3E%3Cpath d='M22 20 L12 32 L22 44 M42 20 L52 32 L42 44 M38 14 L26 50' stroke='%23FFB454' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700;900&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* ============ 设计令牌 ============ */
+:root{
+  --bg:#F2F5FA; --surface:#FFFFFF; --surface-2:#E9EEF6;
+  --ink:#17233B; --ink-2:#4E5F79; --ink-3:#8A99B0;
+  --line:#DCE3EE; --line-2:#C6D0E0;
+  --brand:#1B2A4A; --brand-2:#243A66;
+  --accent:#F59F3D; --accent-deep:#E07E18; --accent-soft:#FFF1DE;
+  --ok:#1E9E62; --ok-soft:#E3F6EC; --err:#D64545; --err-soft:#FDEBEB;
+  --code-bg:#0F1A2E; --code-ink:#DCE6F5; --code-line:#233450;
+  --python:#2E86C1; --js:#D99A1B; --java:#E0653F; --cpp:#4E5FC7; --go:#0FA3B4;
+  --radius:16px; --radius-s:10px;
+  --shadow:0 1px 2px rgba(23,35,59,.05),0 8px 24px -12px rgba(23,35,59,.18);
+  --shadow-lg:0 2px 4px rgba(23,35,59,.06),0 20px 44px -18px rgba(23,35,59,.28);
+  --mono:'JetBrains Mono','Cascadia Code',Consolas,monospace;
+  --sans:'Noto Sans SC','Microsoft YaHei','PingFang SC',system-ui,sans-serif;
+  --display:'Space Grotesk','Noto Sans SC',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.65;-webkit-font-smoothing:antialiased;font-size:15px}
+::selection{background:rgba(245,159,61,.35)}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+img{max-width:100%;display:block}
+code,pre{font-family:var(--mono)}
+
+/* ============ 顶栏 ============ */
+.app-nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav-inner{max-width:1180px;margin:0 auto;padding:0 20px;height:60px;display:flex;align-items:center;gap:18px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:900;font-size:17px;letter-spacing:.3px}
+.brand .logo{width:30px;height:30px;border-radius:8px;background:var(--brand);display:grid;place-items:center;flex:none}
+.brand .logo svg{width:17px;height:17px}
+.brand b{color:var(--accent-deep);font-weight:900}
+.nav-langs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.nav-langs::-webkit-scrollbar{display:none}
+.nav-langs a{display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;font-size:13px;font-weight:500;color:var(--ink-2);white-space:nowrap;transition:.18s}
+.nav-langs a:hover{background:var(--surface-2);color:var(--ink)}
+.nav-langs a.active{background:var(--brand);color:#fff}
+.nav-langs a .dot{width:8px;height:8px;border-radius:50%}
+.nav-progress{margin-left:auto;display:flex;align-items:center;gap:10px;color:var(--ink-2);font-size:13px;font-weight:500}
+.nav-progress .pbar{width:92px;height:6px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.nav-progress .pbar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-deep));border-radius:99px;transition:width .5s}
+
+/* ============ 通用布局 ============ */
+.page{max-width:1180px;margin:0 auto;padding:28px 20px 80px}
+.view{display:none}
+.view.active{display:block;animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.section-title{font-size:22px;font-weight:900;letter-spacing:.2px}
+.section-sub{color:var(--ink-2);font-size:14px;margin-top:4px}
+.muted{color:var(--ink-2)}
+.small{font-size:13px}
+
+/* ============ 按钮 ============ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 22px;border-radius:999px;font-weight:700;font-size:14px;transition:.18s;border:1.5px solid transparent}
+.btn-primary{background:var(--brand);color:#fff}
+.btn-primary:hover{background:var(--brand-2);transform:translateY(-1px);box-shadow:var(--shadow)}
+.btn-accent{background:linear-gradient(135deg,var(--accent),var(--accent-deep));color:#fff}
+.btn-accent:hover{filter:brightness(1.06);transform:translateY(-1px);box-shadow:var(--shadow)}
+.btn-ghost{background:var(--surface);border-color:var(--line-2);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--brand);color:var(--brand)}
+.btn-sm{padding:7px 14px;font-size:13px}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none!important}
+
+/* ============ 首页 ============ */
+.hero{display:grid;grid-template-columns:1fr;gap:28px;align-items:center;padding:30px 0 44px}
+@media(min-width:900px){.hero{grid-template-columns:1.05fr .95fr;gap:44px;padding:52px 0 60px}}
+.hero-kicker{display:inline-flex;align-items:center;gap:8px;background:var(--accent-soft);color:var(--accent-deep);font-size:13px;font-weight:700;padding:6px 14px;border-radius:999px}
+.hero h1{font-size:40px;line-height:1.18;font-weight:900;letter-spacing:.5px;margin:18px 0 14px}
+.hero h1 .hl{position:relative;color:var(--brand);white-space:nowrap}
+.hero h1 .hl::after{content:'';position:absolute;left:0;right:0;bottom:2px;height:10px;background:rgba(245,159,61,.35);z-index:-1;border-radius:4px}
+.hero p.lead{color:var(--ink-2);font-size:16px;max-width:520px}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.hero-stats{display:flex;gap:26px;margin-top:30px;flex-wrap:wrap}
+.hero-stats .hs b{font-size:24px;font-weight:900;font-family:var(--display);display:block;line-height:1.1}
+.hero-stats .hs span{font-size:12.5px;color:var(--ink-3)}
+.hero-visual{position:relative}
+.hero-visual::before{content:'';position:absolute;inset:-8% -6%;background:radial-gradient(60% 60% at 70% 20%,rgba(245,159,61,.18),transparent 70%),radial-gradient(50% 50% at 15% 80%,rgba(46,134,193,.16),transparent 70%);border-radius:30px;z-index:0}
+.hero-visual>*{position:relative;z-index:1}
+
+/* ============ 语言卡片 ============ */
+.lang-grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:20px}
+@media(min-width:640px){.lang-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:980px){.lang-grid{grid-template-columns:repeat(3,1fr)}}
+.lang-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;position:relative;overflow:hidden;cursor:pointer;transition:.22s;display:flex;flex-direction:column;gap:12px}
+.lang-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--lc,#2E86C1)}
+.lang-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:var(--line-2)}
+.lang-card .lc-head{display:flex;align-items:center;gap:12px}
+.lang-card .lc-badge{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:900;font-family:var(--display);font-size:15px;background:var(--lc,#2E86C1);flex:none}
+.lang-card h3{font-size:18px;font-weight:900}
+.lang-card .lc-tag{font-size:12px;color:var(--ink-3);font-weight:500}
+.lang-card p{font-size:13.5px;color:var(--ink-2);line-height:1.6;flex:1}
+.lang-card .lc-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px dashed var(--line);padding-top:12px}
+.lang-card .lc-foot .meta{font-size:12.5px;color:var(--ink-3);display:flex;gap:12px}
+.lang-card .lc-go{font-size:13px;font-weight:700;color:var(--lc,#2E86C1)}
+.ring{--p:0;--c:#2E86C1;width:38px;height:38px;position:relative;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring .track{fill:none;stroke:var(--surface-2);stroke-width:5}
+.ring .bar{fill:none;stroke:var(--c);stroke-width:5;stroke-linecap:round;stroke-dasharray:100.5;stroke-dashoffset:calc(100.5 - var(--p)*1.005);transition:stroke-dashoffset .6s}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:10px;font-weight:700;color:var(--ink-2);font-family:var(--mono)}
+
+/* ============ 特性区 ============ */
+.features{display:grid;grid-template-columns:1fr;gap:16px;margin-top:20px}
+@media(min-width:900px){.features{grid-template-columns:repeat(3,1fr)}}
+.feature{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px}
+.feature .f-ico{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;margin-bottom:14px}
+.feature h4{font-size:16px;font-weight:900;margin-bottom:8px}
+.feature p{font-size:13.5px;color:var(--ink-2)}
+
+/* ============ 语言页 ============ */
+.lang-hero{display:flex;flex-direction:column;gap:18px;background:var(--brand);color:#fff;border-radius:20px;padding:30px 26px;position:relative;overflow:hidden;margin-bottom:26px}
+.lang-hero::before{content:'';position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.14),transparent 70%)}
+.lang-hero::after{content:'';position:absolute;right:80px;bottom:-90px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.08),transparent 70%)}
+.lang-hero .lh-row{display:flex;align-items:center;gap:16px;position:relative;z-index:1}
+.lang-hero .lh-badge{width:56px;height:56px;border-radius:15px;display:grid;place-items:center;color:#fff;font-weight:900;font-family:var(--display);font-size:20px;background:var(--lc,#2E86C1);flex:none;box-shadow:0 6px 18px -6px rgba(0,0,0,.5)}
+.lang-hero h2{font-size:26px;font-weight:900}
+.lang-hero .lh-tag{font-size:13px;color:rgba(255,255,255,.72)}
+.lang-hero .lh-desc{font-size:14.5px;line-height:1.7;color:rgba(255,255,255,.9);max-width:720px;position:relative;z-index:1}
+.lang-hero .lh-meta{display:flex;flex-wrap:wrap;gap:10px;position:relative;z-index:1}
+.lang-hero .chip{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);padding:5px 12px;border-radius:999px;font-size:12.5px;color:#fff}
+.lang-layout{display:grid;grid-template-columns:1fr;gap:22px}
+@media(min-width:900px){.lang-layout{grid-template-columns:1fr 340px}}
+.lesson-list{display:flex;flex-direction:column;gap:12px}
+.lesson-item{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-s);padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:.18s}
+.lesson-item:hover{border-color:var(--lc,#2E86C1);transform:translateX(3px)}
+.lesson-item .li-num{width:34px;height:34px;border-radius:10px;background:var(--surface-2);color:var(--ink-2);display:grid;place-items:center;font-weight:900;font-family:var(--mono);font-size:13px;flex:none}
+.lesson-item.done .li-num{background:var(--ok-soft);color:var(--ok)}
+.lesson-item .li-body{flex:1;min-width:0}
+.lesson-item .li-body h4{font-size:15px;font-weight:700}
+.lesson-item .li-body .li-meta{font-size:12.5px;color:var(--ink-3);margin-top:2px;display:flex;gap:10px;flex-wrap:wrap}
+.lesson-item .li-arrow{color:var(--ink-3);font-size:18px}
+.side-panel{display:flex;flex-direction:column;gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+.panel h4{font-size:15px;font-weight:900;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.panel h4 .dot{width:9px;height:9px;border-radius:50%;background:var(--lc,#2E86C1)}
+.quiz-entry{background:linear-gradient(150deg,var(--brand),var(--brand-2));border-radius:var(--radius);padding:22px;color:#fff}
+.quiz-entry h4{font-size:17px;font-weight:900;margin-bottom:6px}
+.quiz-entry p{font-size:13px;color:rgba(255,255,255,.78);margin-bottom:14px}
+.quiz-entry .qe-stats{display:flex;gap:18px;margin-bottom:16px;font-size:12.5px;color:rgba(255,255,255,.85)}
+.quiz-entry .qe-stats b{font-size:18px;font-weight:900;font-family:var(--display);display:block;color:#fff}
+.panel-list{display:flex;flex-direction:column;gap:10px}
+.pl-item{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--ink-2);padding:9px 12px;border-radius:9px;background:var(--bg)}
+.pl-item b{color:var(--ink);font-weight:700;font-family:var(--mono);font-size:12.5px;min-width:44px}
+.pl-item .cnt{margin-left:auto;font-size:12px;color:var(--ink-3);font-family:var(--mono)}
+
+/* ============ 课程页 ============ */
+.lesson-head{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:8px}
+.lesson-head .back{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink-2);font-weight:500;padding:8px 14px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
+.lesson-head .back:hover{color:var(--brand);border-color:var(--brand)}
+.lesson-title{font-size:24px;font-weight:900;letter-spacing:.2px}
+.lesson-meta{display:flex;gap:12px;flex-wrap:wrap;color:var(--ink-3);font-size:13px;margin-bottom:22px}
+.lesson-meta .tag{padding:3px 10px;border-radius:999px;background:var(--lc-soft,var(--accent-soft));color:var(--lc,#2E86C1);font-weight:700;font-size:12px}
+.kp-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:18px}
+.kp-card h3{font-size:16.5px;font-weight:900;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.kp-card h3 .kp-n{width:26px;height:26px;border-radius:8px;background:var(--lc,#2E86C1);color:#fff;display:grid;place-items:center;font-size:13px;font-family:var(--mono);flex:none}
+.kp-card p{color:var(--ink-2);font-size:14.5px;line-height:1.75}
+.kp-card .inline-code{background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:1px 7px;font-family:var(--mono);font-size:13px;color:var(--brand);white-space:nowrap}
+.demo-wrap{margin:22px 0;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-lg);border:1px solid var(--line)}
+.demo-tabs{display:flex;gap:6px;padding:10px 14px;background:var(--brand);overflow-x:auto}
+.demo-tabs button{padding:7px 14px;border-radius:8px;font-size:13px;color:rgba(255,255,255,.65);font-weight:500;white-space:nowrap}
+.demo-tabs button.active{background:rgba(255,255,255,.16);color:#fff}
+.demo-player{background:var(--code-bg)}
+.code-window{position:relative}
+.cw-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--code-line)}
+.cw-bar .cwd{width:11px;height:11px;border-radius:50%}
+.cw-bar .cwd:nth-child(1){background:#FF5F57}.cw-bar .cwd:nth-child(2){background:#FEBC2E}.cw-bar .cwd:nth-child(3){background:#28C840}
+.cw-bar .cw-file{margin-left:8px;font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.55)}
+.cw-body{overflow-x:auto;padding:14px 16px 16px}
+.cw-lines{min-width:max-content;font-family:var(--mono);font-size:13.5px;line-height:1.75}
+.cw-line{display:flex;align-items:flex-start;border-left:3px solid transparent;padding:0 10px 0 0}
+.cw-line .ln{width:34px;flex:none;text-align:right;color:rgba(255,255,255,.28);padding-right:14px;user-select:none;font-size:12.5px;padding-top:1px}
+.cw-line .lc{white-space:pre;color:var(--code-ink)}
+.cw-line.run{background:rgba(245,159,61,.16);border-left-color:var(--accent)}
+.cw-line.run .ln{color:var(--accent)}
+.cw-line.done{background:rgba(255,255,255,.035)}
+.cw-line .lc .tok-kw{color:#7EC9FF}.cw-line .lc .tok-str{color:#A8E6A1}.cw-line .lc .tok-num{color:#FFD08A}.cw-line .lc .tok-fn{color:#C3A6FF}.cw-line .lc .tok-cm{color:#6B7C99;font-style:italic}.cw-line .lc .tok-bool{color:#FF9EC5}.cw-line .lc .tok-type{color:#6FE3C9}
+
+.demo-stage{display:grid;grid-template-columns:1fr;gap:0}
+@media(min-width:820px){.demo-stage{grid-template-columns:1fr 240px}}
+.demo-console{min-height:74px;max-height:150px;overflow-y:auto;background:rgba(0,0,0,.28);border-top:1px solid var(--code-line);padding:12px 16px;font-family:var(--mono);font-size:13px;line-height:1.7}
+.demo-console .lbl{color:rgba(255,255,255,.35);font-size:11px;letter-spacing:1px;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.demo-console .lbl i{width:6px;height:6px;border-radius:50%;background:var(--ok);display:inline-block}
+.demo-console .out{color:#B8F0C9}
+.demo-console .err{color:#FF9C9C}
+.demo-vars{border-top:1px solid var(--code-line);background:rgba(255,255,255,.03);padding:12px 16px}
+@media(min-width:820px){.demo-vars{border-top:none;border-left:1px solid var(--code-line)}}
+.demo-vars .lbl{color:rgba(255,255,255,.35);font-size:11px;letter-spacing:1px;margin-bottom:8px}
+.var-row{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:12.5px;padding:5px 0;border-bottom:1px dashed rgba(255,255,255,.08)}
+.var-row:last-child{border-bottom:none}
+.var-row .vn{color:#FFD08A}
+.var-row .vv{color:#A8E6A1;word-break:break-all;text-align:right}
+.var-empty{color:rgba(255,255,255,.3);font-size:12.5px;font-family:var(--mono)}
+.demo-note{background:rgba(255,255,255,.045);border-left:3px solid var(--accent);margin:0 16px 14px;padding:10px 14px;font-size:13.5px;line-height:1.7;color:#E8EFFA;border-radius:0 8px 8px 0;min-height:20px}
+.demo-note .ntag{color:var(--accent);font-weight:700;margin-right:6px}
+.demo-controls{display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:1px solid var(--code-line);flex-wrap:wrap}
+.ctrl-btn{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.08);color:#fff;display:grid;place-items:center;transition:.15s;flex:none}
+.ctrl-btn:hover{background:rgba(255,255,255,.18)}
+.ctrl-btn.main{width:44px;height:44px;background:var(--accent);color:#16202E;border-radius:50%}
+.ctrl-btn.main:hover{background:var(--accent-deep);color:#fff}
+.ctrl-btn svg{width:17px;height:17px}
+.ctrl-btn.main svg{width:20px;height:20px}
+.demo-progress{flex:1;min-width:120px;height:6px;background:rgba(255,255,255,.12);border-radius:99px;position:relative;overflow:hidden;cursor:pointer}
+.demo-progress i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--accent);border-radius:99px;transition:width .15s}
+.demo-stepinfo{font-family:var(--mono);font-size:12px;color:rgba(255,255,255,.5)}
+.speed-group{display:flex;gap:4px}
+.speed-group button{padding:5px 9px;border-radius:7px;font-size:11.5px;color:rgba(255,255,255,.55);font-family:var(--mono)}
+.speed-group button.active{background:rgba(245,159,61,.22);color:var(--accent);font-weight:700}
+.lesson-nav{display:flex;justify-content:space-between;gap:12px;margin-top:24px;flex-wrap:wrap}
+.lesson-tip{background:var(--accent-soft);border:1px solid #F6D9B0;border-radius:var(--radius-s);padding:14px 18px;font-size:13.5px;color:#7A4A10;line-height:1.7;margin-top:18px}
+.lesson-tip b{color:#5E3A08}
+.kp-extra{background:var(--bg);border-radius:var(--radius-s);padding:14px 16px;margin-top:14px;font-size:13.5px;color:var(--ink-2);line-height:1.75}
+.kp-extra b{color:var(--ink)}
+
+/* ============ 习题页 ============ */
+.quiz-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.quiz-head .back{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink-2);padding:8px 14px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
+.quiz-head .back:hover{color:var(--brand);border-color:var(--brand)}
+.quiz-title{font-size:20px;font-weight:900}
+.quiz-progress{flex:1;min-width:140px;display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--ink-3)}
+.quiz-progress .qbar{flex:1;height:7px;background:var(--surface-2);border-radius:99px;overflow:hidden}
+.quiz-progress .qbar i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-deep));transition:width .35s;border-radius:99px}
+.quiz-score{font-family:var(--mono);font-weight:700;color:var(--brand)}
+.quiz-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);max-width:860px}
+.q-meta{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.q-meta .q-num{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--ink-2)}
+.diff{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:999px}
+.diff.easy{background:var(--ok-soft);color:var(--ok)}
+.diff.mid{background:var(--accent-soft);color:var(--accent-deep)}
+.diff.hard{background:var(--err-soft);color:var(--err)}
+.q-text{font-size:16.5px;font-weight:700;line-height:1.7;margin-bottom:6px}
+.q-code{margin:14px 0;border-radius:12px;overflow:hidden;background:var(--code-bg);border:1px solid var(--line)}
+.q-code .qc-bar{padding:9px 14px;background:rgba(255,255,255,.05);font-family:var(--mono);font-size:11.5px;color:rgba(255,255,255,.5);border-bottom:1px solid var(--code-line)}
+.q-code pre{padding:14px 16px;overflow-x:auto;font-size:13.5px;line-height:1.7;color:var(--code-ink)}
+.options{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+.option{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:13px 16px;border:1.5px solid var(--line-2);border-radius:12px;font-size:14.5px;font-weight:500;transition:.16s;background:var(--surface)}
+.option .opt-key{width:28px;height:28px;border-radius:9px;background:var(--surface-2);display:grid;place-items:center;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--ink-2);flex:none;transition:.16s}
+.option:hover{border-color:var(--brand);background:var(--bg)}
+.option.selected{border-color:var(--brand);background:#EEF2FF}
+.option.selected .opt-key{background:var(--brand);color:#fff}
+.option.correct{border-color:var(--ok);background:var(--ok-soft)}
+.option.correct .opt-key{background:var(--ok);color:#fff}
+.option.wrong{border-color:var(--err);background:var(--err-soft)}
+.option.wrong .opt-key{background:var(--err);color:#fff}
+.option.plain{opacity:.55;pointer-events:none}
+.option[disabled]{cursor:default}
+.q-feedback{display:none;margin-top:18px;border-radius:14px;overflow:hidden;border:1px solid var(--line)}
+.q-feedback.show{display:block;animation:fadeUp .3s ease}
+.qf-head{display:flex;align-items:center;gap:10px;padding:13px 18px;font-weight:800;font-size:14.5px;color:#fff}
+.qf-head.correct-bg{background:var(--ok)}
+.qf-head.wrong-bg{background:var(--err)}
+.qf-head svg{width:19px;height:19px}
+.qf-body{padding:18px;background:var(--surface)}
+.qf-story{font-size:14.5px;line-height:1.85;color:var(--ink);margin-bottom:14px}
+.qf-story b{color:var(--brand)}
+.qf-steps{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.qf-step{display:flex;gap:10px;font-size:13.5px;color:var(--ink-2);line-height:1.7}
+.qf-step .sdot{width:6px;height:6px;border-radius:50%;background:var(--accent);margin-top:8px;flex:none}
+.qf-key{background:var(--bg);border-left:4px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 16px;font-size:13.5px;line-height:1.75;color:var(--ink);margin-bottom:14px}
+.qf-key b{color:var(--accent-deep)}
+.qf-answer{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:800;color:var(--ink)}
+.qf-answer .badge{background:var(--brand);color:#fff;padding:6px 16px;border-radius:999px;font-family:var(--mono);font-size:14px}
+.qf-next{display:flex;justify-content:flex-end;margin-top:18px;gap:10px;flex-wrap:wrap}
+.quiz-result{display:none;text-align:center;padding:30px 10px;max-width:560px;margin:0 auto}
+.quiz-result.show{display:block;animation:fadeUp .4s ease}
+.quiz-result .qr-ring{width:130px;height:130px;margin:0 auto 20px;position:relative}
+.quiz-result .qr-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.quiz-result .qr-ring .track{fill:none;stroke:var(--surface-2);stroke-width:9}
+.quiz-result .qr-ring .bar{fill:none;stroke:url(#qrGrad);stroke-width:9;stroke-linecap:round;stroke-dasharray:345.6;stroke-dashoffset:345.6;transition:stroke-dashoffset 1s ease}
+.quiz-result .qr-ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:30px;font-family:var(--display);font-weight:900}
+.quiz-result h3{font-size:22px;font-weight:900;margin-bottom:8px}
+.quiz-result p{color:var(--ink-2);font-size:14.5px;margin-bottom:22px;line-height:1.7}
+.qr-stats{display:flex;justify-content:center;gap:28px;margin-bottom:24px;flex-wrap:wrap}
+.qr-stats .s b{font-size:22px;font-weight:900;font-family:var(--display);display:block}
+.qr-stats .s.ok b{color:var(--ok)}.qr-stats .s.no b{color:var(--err)}.qr-stats .s span{font-size:12.5px;color:var(--ink-3)}
+
+/* ============ 页脚 ============ */
+.foot{border-top:1px solid var(--line);background:var(--surface);margin-top:40px}
+.foot-inner{max-width:1180px;margin:0 auto;padding:28px 20px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;font-size:13px;color:var(--ink-3)}
+.foot b{color:var(--ink-2)}
+
+/* ============ Toast ============ */
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--brand);color:#fff;padding:11px 22px;border-radius:999px;font-size:13.5px;font-weight:500;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:.3s;z-index:99;max-width:88vw}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ============ 练习场 ============ */
+.prac-wrap{display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start}
+.prac-list{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px;position:sticky;top:70px}
+.prac-list h4{margin:4px 8px 8px;font-size:13px;color:var(--ink-3);font-weight:600}
+.prac-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:10px;cursor:pointer;font-size:14px;color:var(--ink-2);margin-bottom:2px;border:1px solid transparent}
+.prac-item:hover{background:var(--brand-soft)}
+.prac-item.active{background:var(--brand-soft);border-color:color-mix(in srgb,var(--brand) 25%,white);color:var(--brand);font-weight:700}
+.prac-item .tick{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--line);flex:0 0 16px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff}
+.prac-item.done .tick{background:var(--ok);border-color:var(--ok)}
+.prac-item.done .tick::after{content:'✓'}
+.prac-main{min-width:0}
+.prac-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:16px}
+.prac-card h3{font-size:19px;margin:0 0 6px;color:var(--ink)}
+.prac-card .prac-desc{font-size:14.5px;line-height:1.8;color:var(--ink-2)}
+.prac-card .prac-desc code{background:var(--brand-soft);padding:1px 6px;border-radius:5px;font-family:var(--mono);font-size:13px;color:var(--brand)}
+.prac-hint{margin-top:12px;background:#FFF8EC;border:1px dashed #E8C98A;border-radius:10px;padding:10px 14px;font-size:13.5px;color:#8A6A2E;display:none}
+.prac-hint.show{display:block}
+.prac-hint b{color:#8A6A2E}
+.editor-shell{background:#1B2A41;border-radius:14px;overflow:hidden;border:1px solid #2C3E5C}
+.editor-bar{display:flex;align-items:center;gap:7px;padding:10px 14px;background:#22334F;color:#9FB3D1;font-size:12.5px;font-family:var(--mono)}
+.editor-bar .dots{display:flex;gap:6px;margin-right:6px}
+.editor-bar .dots i{width:10px;height:10px;border-radius:50%}
+.editor-bar .dots i:nth-child(1){background:#FF5F57}.editor-bar .dots i:nth-child(2){background:#FEBC2E}.editor-bar .dots i:nth-child(3){background:#28C840}
+.editor-body{display:flex}
+.gutter{padding:12px 0;background:#1B2A41;color:#4A5E80;font-family:var(--mono);font-size:13.5px;line-height:1.7;user-select:none;text-align:right;min-width:44px;padding-right:12px}
+.code-editor{flex:1;background:transparent;border:0;outline:0;resize:none;color:#E8EEF9;font-family:var(--mono);font-size:13.5px;line-height:1.7;padding:12px 14px;tab-size:4;white-space:pre;overflow:auto;min-height:200px}
+.code-editor::placeholder{color:#5C7194}
+.prac-actions{display:flex;gap:10px;align-items:center;margin:14px 0;flex-wrap:wrap}
+.run-status{font-size:13px;color:var(--ink-3)}
+.term{background:#0F1B2E;border-radius:12px;padding:14px 16px;font-family:var(--mono);font-size:13px;line-height:1.75;color:#C9D6EC;max-height:300px;overflow:auto;white-space:pre-wrap}
+.term .t-ok{color:#4ADE80}.term .t-err{color:#FF6B6B}.term .t-dim{color:#6B7FA3}
+.test-row{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px dashed #E9EDF3;font-size:13.5px}
+.test-row:last-child{border-bottom:0}
+.test-row .ico{width:18px;height:18px;border-radius:50%;flex:0 0 18px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;margin-top:2px}
+.test-row.pass .ico{background:var(--ok)}.test-row.fail .ico{background:var(--err)}
+.test-row .expr{color:var(--ink-3);font-family:var(--mono)}
+.test-row .got{color:var(--err);font-family:var(--mono)}
+.test-row .want{color:var(--ok);font-family:var(--mono)}
+.prac-banner{background:var(--brand-soft);border:1px solid color-mix(in srgb,var(--brand) 18%,white);border-radius:12px;padding:12px 16px;font-size:13.5px;color:var(--brand);margin-bottom:16px;line-height:1.7}
+@media (max-width:820px){.prac-wrap{grid-template-columns:1fr}.prac-list{position:static}}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+<!-- ===== 顶栏 ===== -->
+<nav class="app-nav">
+  <div class="nav-inner">
+    <a class="brand" href="#/"><span class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M8 6 L3 12 L8 18 M16 6 L21 12 L16 18 M14 4 L10 20" stroke="#FFB454" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>码上学<b>CodeCamp</b></span></a>
+    <div class="nav-langs" id="navLangs"></div>
+    <div class="nav-progress" title="总学习进度">
+      <span id="navPct" class="small">0%</span>
+      <span class="pbar"><i id="navBar"></i></span>
+    </div>
+  </div>
+</nav>
+
+<main class="page" id="page">
+
+  <!-- ===== 视图：首页 ===== -->
+  <section class="view" id="view-home">
+    <div class="hero">
+      <div>
+        <span class="hero-kicker"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M13 2 L4.5 13.5 H11 L9.5 22 L19.5 10 H12.5 L13 2 Z" fill="#E07E18"/></svg>边看代码运行 · 边刷题巩固</span>
+        <h1>主流编程语言，<br><span class="hl">看得见</span>地学会</h1>
+        <p class="lead">Python、JavaScript、Java、C++、Go 五大语言入门体系。每一节课都配有逐行执行的代码演示，每一道习题都有生动易懂的详细解析。</p>
+        <div class="hero-cta">
+          <a class="btn btn-accent" href="#/lang/python">立即开始学习</a>
+          <a class="btn btn-ghost" href="#/quiz/python">直接挑战习题</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hs"><b id="stLessons">30</b><span>节视频式课程</span></div>
+          <div class="hs"><b id="stQuizzes">88</b><span>道精选习题</span></div>
+          <div class="hs"><b id="stPrac">21</b><span>个动手练习</span></div>
+          <div class="hs"><b>5</b><span>门主流语言</span></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="demo-wrap" id="heroPlayer"></div>
+      </div>
+    </div>
+
+    <div class="section-title">选择一门语言开始</div>
+    <div class="section-sub">零基础友好 · 每门语言 6 节课 + 大量习题 + 动手写代码真运行</div>
+    <div class="lang-grid" id="langGrid"></div>
+
+    <div class="section-title" style="margin-top:44px">为什么用这种方式学？</div>
+    <div class="features">
+      <div class="feature">
+        <div class="f-ico" style="background:var(--ok-soft)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="3" stroke="#1E9E62" stroke-width="2"/><path d="M7 12 L10 15 L17 8" stroke="#1E9E62" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h4>视频式代码演示</h4>
+        <p>每节课的示例代码都能像看视频一样逐行播放：哪一行在运行、变量怎么变化、控制台输出什么，一目了然，还能自己控制节奏。</p>
+      </div>
+      <div class="feature">
+        <div class="f-ico" style="background:var(--accent-soft)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 19 L9 14 L13 17 L20 9" stroke="#E07E18" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 9 H20 V14" stroke="#E07E18" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h4>海量习题 + 详细解析</h4>
+        <p>88 道覆盖全部知识点的练习题，做完立刻看解析——用形象的比喻把抽象概念讲明白，错的题也能真正弄懂。</p>
+      </div>
+      <div class="feature">
+        <div class="f-ico" style="background:#EEF0FF"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#4E5FC7" stroke-width="2"/><path d="M12 7 V12 L15 14" stroke="#4E5FC7" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+        <h4>进度自动保存</h4>
+        <p>课程学到哪、习题做到哪、正确率多少，都自动保存在本地浏览器里，随时回来接着学，不丢进度。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 视图：语言主页 ===== -->
+  <section class="view" id="view-lang"></section>
+
+  <!-- ===== 视图：课程页 ===== -->
+  <section class="view" id="view-lesson"></section>
+
+  <!-- ===== 视图：习题页 ===== -->
+  <section class="view" id="view-quiz"></section>
+
+  <!-- ===== 视图：练习场 ===== -->
+  <section class="view" id="view-practice"></section>
+
+</main>
+
+<footer class="foot">
+  <div class="foot-inner">
+    <span>码上学 CodeCamp · <b>让每一行代码的运行都看得见</b></span>
+    <span>课程与习题内容为学习用途的原创示例，解析风格受社区高赞教学启发</span>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<!-- ===== 数据：课程与演示 ===== -->
+<script>
+/* ================= 语言元信息 ================= */
+const LANG_META = {
+  python:{name:'Python',tag:'优雅简洁的万能选手',color:'#2E86C1',full:'Python',desc:'语法接近自然语言，上手极快，是数据分析、人工智能、自动化脚本领域的事实标准。适合作为你的第一门编程语言。',uses:['数据分析','人工智能','自动化','Web 开发'],icon:'Py',lc:'#2E86C1'},
+  js:{name:'JavaScript',tag:'网页的灵魂语言',color:'#D99A1B',full:'JavaScript',desc:'浏览器里唯一能直接运行的语言，前端开发的核心。学会它，你就能让网页动起来，也能轻松转向 Node.js 后端。',uses:['网页前端','小程序','Node.js','游戏开发'],icon:'JS',lc:'#D99A1B'},
+  java:{name:'Java',tag:'企业级常青树',color:'#E0653F',full:'Java',desc:'二十多年稳居编程榜前列的“老大哥”，安卓开发与大型企业系统的中坚力量。严格类型系统帮你养成严谨的编码习惯。',uses:['安卓开发','企业系统','大数据','后端服务'],icon:'Ja',lc:'#E0653F'},
+  cpp:{name:'C++',tag:'高性能之选',color:'#4E5FC7',full:'C++',desc:'同时掌握底层内存与高层抽象的语言，游戏引擎、操作系统、高性能计算都离不开它。理解它，你就理解了计算机的运行本质。',uses:['游戏引擎','操作系统','高性能计算','嵌入式'],icon:'C++',lc:'#4E5FC7'},
+  go:{name:'Go',tag:'云原生新贵',color:'#0FA3B4',full:'Go',desc:'谷歌出品的现代语言，语法极简、并发能力一流，是 Docker、Kubernetes 等云原生基础设施的首选语言。',uses:['云原生','微服务','网络编程','命令行工具'],icon:'Go',lc:'#0FA3B4'}
+};
+const LANG_ORDER = ['python','js','java','cpp','go'];
+
+/* ================= 课程与演示数据 =================
+ * demo.steps: 每一步 {line:高亮行(0起), vars:变量快照, out:追加控制台输出, note:讲解字幕}
+ */
+const LESSONS = {
+python:[
+{id:'py-var', title:'变量与数据类型', dur:'8 分钟', points:[
+  {t:'变量 = 贴了标签的盒子', d:'变量名就是盒子上的标签，赋值就是把值装进盒子。盒子里的值可以随时换，标签不变。'},
+  {t:'四种基础类型', d:'整数 int（16）、小数 float（1.75）、字符串 str（"小码"）、布尔 bool（True/False）。Python 会自动判断类型。'},
+  {t:'用 type() 验货', d:'type() 函数像一位验货员，一眼就能看出盒子里装的是什么类型。'}
+],
+demo:{file:'types.py', code:`name = "小码"
+age = 16
+height = 1.75
+is_student = True
+print(type(name))
+print(age + 1)`,
+steps:[
+{line:0,vars:{name:"'小码'"},note:'第 1 行执行：计算机打开一个叫 <b>name</b> 的新盒子，把字符串 "小码" 放进去。'},
+{line:1,vars:{name:"'小码'",age:"16"},note:'第 2 行：再开一个叫 <b>age</b> 的盒子，装进整数 16。'},
+{line:2,vars:{name:"'小码'",age:"16",height:"1.75"},note:'第 3 行：<b>height</b> 盒子里装的是小数 1.75。'},
+{line:3,vars:{name:"'小码'",age:"16",height:"1.75",is_student:"True"},note:'第 4 行：<b>is_student</b> 装的是布尔值 True——只可能是真或假。'},
+{line:4,vars:{name:"'小码'",age:"16",height:"1.75",is_student:"True"},out:`<class 'str'>`,note:'第 5 行：验货员 type() 出场，告诉我们 name 里装的是字符串类型 str。'},
+{line:5,vars:{name:"'小码'",age:"16",height:"1.75",is_student:"True"},out:`17`,note:'第 6 行：先算 16 + 1 得 17 再打印。注意：age 盒子里的值还是 16，没被改变。'}
+]}},
+{id:'py-str', title:'字符串与不可变性', dur:'9 分钟', points:[
+  {t:'字符串 = 一串字符', d:'字符串 str 就是一连串字符，用引号包起来。可以用 + 拼接，用 len() 数长度。'},
+  {t:'replace 返回新字符串', d:'s.replace(a, b) 会生成一个把 a 换成 b 的<em>新</em>字符串，原字符串纹丝不动——这叫“不可变性”。'},
+  {t:'方法调用不修改原对象', d:'Python 中字符串一旦创建就不能修改，所有“修改”操作其实都是返回一份新的副本。'}
+],
+demo:{file:'str.py', code:`s = "python"
+new_s = s.replace("p", "P")
+print(s)
+print(new_s)`,
+steps:[
+{line:0,vars:{s:"'python'"},note:'第 1 行：把字符串 "python" 装进 <b>s</b> 盒子。'},
+{line:1,vars:{s:"'python'",new_s:"'Python'"},note:'第 2 行：replace 像一位“抄写员”——对着 s 里的字抄一份新的，抄写时把小写 p 换成大写 P，得到新字符串 "Python" 放进 <b>new_s</b>。'},
+{line:2,vars:{s:"'python'",new_s:"'Python'"},out:`python`,note:'第 3 行：打印 <b>s</b>——原字条从头到尾没被动过，还是小写 python。'},
+{line:3,vars:{s:"'python'",new_s:"'Python'"},out:`Python`,note:'第 4 行：打印新副本 new_s，才是改过的 Python。'}
+]}},
+{id:'py-if', title:'条件判断 if / elif / else', dur:'10 分钟', points:[
+  {t:'if 让程序会“思考”', d:'if 条件成立就执行缩进的代码块；elif 是“否则如果”，else 是兜底的“否则”。'},
+  {t:'从上往下逐个检查', d:'程序按顺序检查每个条件，命中一个就进入对应分支，后面的分支全部跳过。'},
+  {t:'缩进就是代码块', d:'Python 用缩进划分代码归属，同一缩进的语句属于同一个分支——缩进错了程序就“认错人”了。'}
+],
+demo:{file:'grade.py', code:`score = 85
+if score >= 90:
+    print("优秀")
+elif score >= 80:
+    print("良好")
+else:
+    print("加油")`,
+steps:[
+{line:0,vars:{score:"85"},note:'第 1 行：score 盒子装进 85。'},
+{line:1,vars:{score:"85"},note:'第 2 行：检查 score &gt;= 90？85 不到 90，条件不成立，跳过整个 if 分支。'},
+{line:3,vars:{score:"85"},note:'第 4 行：轮到 elif 检查 score &gt;= 80？85 满足！进入这个分支。'},
+{line:4,vars:{score:"85"},out:`良好`,note:'第 5 行：打印“良好”。下面的 else 分支被整体跳过。'},
+{line:5,vars:{score:"85"},note:'第 6 行：else 是兜底选项，既然前面已命中，这一行不会执行。'}
+]}},
+{id:'py-loop', title:'for 循环与 range', dur:'11 分钟', points:[
+  {t:'for 是“逐个过一遍”', d:'for i in range(1,6) 让变量 i 依次取 1、2、3、4、5，每取一个值就执行一次循环体。'},
+  {t:'累加器模式', d:'total = total + i 是最常用的累加写法：把新值累进一个“记账本”变量里。'},
+  {t:'range(起, 止) 左闭右开', d:'range(1,6) 包含 1 但不包含 6，所以是 1 到 5，正好 5 个数。'}
+],
+demo:{file:'sum.py', code:`total = 0
+for i in range(1, 6):
+    total = total + i
+    print("累加", i, "→", total)
+print("最终:", total)`,
+steps:[
+{line:0,vars:{total:"0"},note:'第 1 行：开一个“记账本”total，先记 0。'},
+{line:1,vars:{total:"0",i:"1"},note:'第 2 行：for 循环开始，i 取出第一个值 1。'},
+{line:2,vars:{total:"1",i:"1"},note:'第 3 行：total = 0 + 1，记账本变成 1。'},
+{line:3,vars:{total:"1",i:"1"},out:`累加 1 → 1`,note:'第 4 行：打印这一轮的结果。'},
+{line:1,vars:{total:"10",i:"5"},note:'循环继续：i 依次取 2、3、4，total 累加到 10。这是第 5 轮，i = 5。'},
+{line:2,vars:{total:"15",i:"5"},note:'第 3 行：total = 10 + 5 = 15，累加完成。'},
+{line:3,vars:{total:"15",i:"5"},out:`累加 5 → 15`,note:'打印第 5 轮结果。'},
+{line:4,vars:{total:"15"},out:`最终: 15`,note:'循环结束（range 不含 6），打印最终结果 15。'}
+]}},
+{id:'py-list', title:'列表的增删改查', dur:'10 分钟', points:[
+  {t:'列表 = 有编号的货架', d:'列表 list 用方括号 [ ] 表示，可以装任意多个值，编号从 0 开始。'},
+  {t:'常用方法', d:'append() 往末尾追加、sort() 原地排序、len() 数个数、索引 nums[0] 取第一个。'},
+  {t:'方法和函数要分清', d:'方法（如 append）挂在对象后面用点调用，函数（如 len、print）直接调用。'}
+],
+demo:{file:'list.py', code:`nums = [3, 1, 2]
+nums.append(4)
+nums.sort()
+total = len(nums)
+print(nums)
+print(total)`,
+steps:[
+{line:0,vars:{nums:"[3, 1, 2]"},note:'第 1 行：货架上摆好 3 个数字。'},
+{line:1,vars:{nums:"[3, 1, 2, 4]"},note:'第 2 行：append(4) 把 4 追加到货架末尾。'},
+{line:2,vars:{nums:"[1, 2, 3, 4]"},note:'第 3 行：sort() 让货架上的数字从小到大重新排队。'},
+{line:3,vars:{nums:"[1, 2, 3, 4]",total:"4"},note:'第 4 行：len() 数一数，一共 4 个元素，记到 total。'},
+{line:4,vars:{nums:"[1, 2, 3, 4]",total:"4"},out:`[1, 2, 3, 4]`,note:'第 5 行：打印排序后的列表。'},
+{line:5,vars:{nums:"[1, 2, 3, 4]",total:"4"},out:`4`,note:'第 6 行：打印元素个数 4。'}
+]}},
+{id:'py-fn', title:'函数的定义与调用', dur:'9 分钟', points:[
+  {t:'函数 = 可复用的“加工车间”', d:'def 定义一个函数，参数是输入，return 是把加工结果送出去。'},
+  {t:'定义不执行，调用才执行', d:'函数体只有被调用时才运行。先“教会”它，再“命令”它干活。'},
+  {t:'return 返回结果', d:'调用函数得到的就是 return 后面的值，可以用变量接住。没有 return 返回 None。'}
+],
+demo:{file:'greet.py', code:`def greet(name):
+    return "你好，" + name
+
+msg = greet("小码")
+print(msg)`,
+steps:[
+{line:0,vars:{},note:'第 1 行：定义函数 greet，告诉计算机“这是个加工车间，输入一个名字”。此时函数体还没执行。'},
+{line:2,vars:{name:"'小码'"},note:'第 3 行：调用 greet("小码")——车间开工，参数 name 接到 "小码"。'},
+{line:1,vars:{name:"'小码'"},note:'第 2 行：车间里把 "你好，" 和 "小码" 拼接起来，return 把结果送出厂。'},
+{line:3,vars:{name:"'小码'",msg:"'你好，小码'"},note:'返回的 "你好，小码" 被 <b>msg</b> 盒子接住。'},
+{line:4,vars:{name:"'小码'",msg:"'你好，小码'"},out:`你好，小码`,note:'第 5 行：打印 msg，任务完成。'}
+]}}
+],
+js:[
+{id:'js-var', title:'let / const 与动态类型', dur:'8 分钟', points:[
+  {t:'let 可变，const 不可变', d:'let 声明的变量可以重新赋值；const 声明的常量一旦赋值就不能再改，改会直接报错。'},
+  {t:'JS 是动态类型', d:'同一个变量先存数字、再存字符串都可以，类型跟着值走。'},
+  {t:'console.log 打印', d:'浏览器里的打印用 console.log()，输出会显示在开发者工具的 Console 面板。'}
+],
+demo:{file:'var.js', code:`let age = 16
+age = 17
+const name = "小码"
+console.log(age, name)`,
+steps:[
+{line:0,vars:{age:"16"},note:'第 1 行：let 开一个 <b>age</b> 盒子，装 16。'},
+{line:1,vars:{age:"17"},note:'第 2 行：重新赋值，盒子里的值变成 17——let 允许换内容。'},
+{line:2,vars:{age:"17",name:"'小码'"},note:'第 3 行：const 声明 <b>name</b>，这个盒子是“保险箱”，之后锁死不能再换。'},
+{line:3,vars:{age:"17",name:"'小码'"},out:`17 小码`,note:'第 4 行：console.log 把两个值打印出来。'}
+]}},
+{id:'js-str', title:'字符串与模板字符串', dur:'9 分钟', points:[
+  {t:'模板字符串', d:'用反引号 ` 包起来，${变量} 可以把变量直接嵌进字符串里，比 + 拼接更清爽。'},
+  {t:'length 属性', d:'字符串的 length 属性直接给出字符个数，是属性不是方法，不用加括号。'},
+  {t:'单双引号都行', d:'JS 里单引号和双引号等价，选一种风格保持一致即可。'}
+],
+demo:{file:'str.js', code:`const lang = "JavaScript"
+const year = 1995
+console.log(\`${'${lang}'} 诞生于 ${'${year}'} 年\`)
+console.log(lang.length)`,
+steps:[
+{line:0,vars:{lang:"'JavaScript'"},note:'第 1 行：const 声明 lang，装 "JavaScript"。'},
+{line:1,vars:{lang:"'JavaScript'",year:"1995"},note:'第 2 行：声明 year 为 1995。'},
+{line:2,vars:{lang:"'JavaScript'",year:"1995"},out:`JavaScript 诞生于 1995 年`,note:'第 3 行：模板字符串里的 ${lang}、${year} 被替换成真实值，像填空一样拼出完整句子。'},
+{line:3,vars:{lang:"'JavaScript'",year:"1995"},out:`10`,note:'第 4 行：length 报出 "JavaScript" 一共 10 个字符。'}
+]}},
+{id:'js-if', title:'条件判断与三元运算', dur:'10 分钟', points:[
+  {t:'if / else 二选一', d:'条件成立走 if 分支，否则走 else 分支，大括号圈定各自的地盘。'},
+  {t:'三元表达式', d:'条件 ? A : B 是一行版的 if/else——条件成立取 A，否则取 B，适合快速赋值。'},
+  {t:'比较运算', d:'&gt;=、&lt;、=== 等比较运算的结果是布尔值 true / false，作为判断依据。'}
+],
+demo:{file:'age.js', code:`const age = 20
+if (age >= 18) {
+  console.log("成年")
+} else {
+  console.log("未成年")
+}
+const tip = age >= 18 ? "可考驾照" : "再等等"
+console.log(tip)`,
+steps:[
+{line:0,vars:{age:"20"},note:'第 1 行：age 装 20。'},
+{line:1,vars:{age:"20"},note:'第 2 行：检查 age &gt;= 18？20 满足，进入 if 分支。'},
+{line:2,vars:{age:"20"},out:`成年`,note:'第 3 行：打印“成年”，else 分支被跳过。'},
+{line:5,vars:{age:"20",tip:"'可考驾照'"},note:'第 6 行：三元表达式快速判断——成立取冒号左边，tip 得到 "可考驾照"。'},
+{line:6,vars:{age:"20",tip:"'可考驾照'"},out:`可考驾照`,note:'第 7 行：打印 tip。'}
+]}},
+{id:'js-loop', title:'for 循环与累加', dur:'11 分钟', points:[
+  {t:'for 三要素', d:'for (let i = 1; i &lt;= 100; i++) 中，初始化、条件、步进三部分用分号隔开。'},
+  {t:'i++ 是自增', d:'i++ 相当于 i = i + 1，每轮循环结束让计数器加 1。'},
+  {t:'循环会自己“转圈”', d:'只要条件 i &lt;= 100 成立就继续，直到条件为假才停下。'}
+],
+demo:{file:'sum.js', code:`let sum = 0
+for (let i = 1; i <= 100; i++) {
+  sum += i
+}
+console.log(sum)`,
+steps:[
+{line:0,vars:{sum:"0"},note:'第 1 行：记账本 sum 从 0 开始。'},
+{line:1,vars:{sum:"0",i:"1"},note:'第 2 行：循环初始化 i = 1，检查 1 &lt;= 100 成立，进入循环体。'},
+{line:2,vars:{sum:"1",i:"1"},note:'第 3 行：sum += i，即 sum = 0 + 1 = 1。'},
+{line:1,vars:{sum:"5050",i:"100"},note:'循环高速转圈：i 一路加到 100，sum 累加到 5050。这就是 1 加到 100 的著名结果。'},
+{line:2,vars:{sum:"5050",i:"100"},note:'最后一次：sum = 5050 + 100 不再变化前，其实已经算完。'},
+{line:3,vars:{sum:"5050"},out:`5050`,note:'第 4 行：条件 i &lt;= 100 不再成立（i 已变 101），循环结束，打印 5050。'}
+]}},
+{id:'js-array', title:'数组与 map / filter', dur:'11 分钟', points:[
+  {t:'数组 = 有序列表', d:'数组用方括号 [ ]，元素用逗号分隔，从索引 0 开始数。'},
+  {t:'map 逐个变形', d:'nums.map(n => n * 2) 对每个元素执行箭头函数，返回一个“变形后”的新数组，原数组不动。'},
+  {t:'filter 按条件筛选', d:'nums.filter(n => n % 2 === 0) 把满足条件的元素挑出来组成新数组——函数返回 true 就留下。'}
+],
+demo:{file:'arr.js', code:`const nums = [1, 2, 3, 4, 5]
+const doubled = nums.map(n => n * 2)
+const evens = nums.filter(n => n % 2 === 0)
+console.log(doubled)
+console.log(evens)`,
+steps:[
+{line:0,vars:{nums:"[1, 2, 3, 4, 5]"},note:'第 1 行：货架上摆好 5 个数字。'},
+{line:1,vars:{nums:"[1, 2, 3, 4, 5]",doubled:"[2, 4, 6, 8, 10]"},note:'第 2 行：map 派一位“乘 2 专员”逐个拜访元素，产出全新数组 [2,4,6,8,10]，原数组没被碰。'},
+{line:2,vars:{nums:"[1, 2, 3, 4, 5]",doubled:"[2, 4, 6, 8, 10]",evens:"[2, 4]"},note:'第 3 行：filter 派一位“偶数检查员”，只有 n % 2 === 0 的元素才能通过，挑出 [2, 4]。'},
+{line:3,vars:{nums:"[1, 2, 3, 4, 5]",doubled:"[2, 4, 6, 8, 10]",evens:"[2, 4]"},out:`[2, 4, 6, 8, 10]`,note:'第 4 行：打印变形后的数组。'},
+{line:4,vars:{nums:"[1, 2, 3, 4, 5]",doubled:"[2, 4, 6, 8, 10]",evens:"[2, 4]"},out:`[2, 4]`,note:'第 5 行：打印筛选后的数组。'}
+]}},
+{id:'js-fn', title:'函数与箭头函数', dur:'9 分钟', points:[
+  {t:'箭头函数很简洁', d:'const add = (a, b) => a + b 省略了 function 关键字和大括号，适合简单函数。'},
+  {t:'参数是输入，返回值是输出', d:'调用 add(3, 4) 把 3、4 传进去，函数把相加结果送回来。'},
+  {t:'函数也是一种值', d:'函数可以像变量一样被赋值、被传递，这是 JS 函数式风格的基石。'}
+],
+demo:{file:'fn.js', code:`const add = (a, b) => a + b
+const result = add(3, 4)
+console.log(result)`,
+steps:[
+{line:0,vars:{add:"ƒ (a, b)"},note:'第 1 行：定义一个箭头函数 add，它等着接收两个参数并返回它们的和。函数此刻只是“待命”状态。'},
+{line:1,vars:{add:"ƒ (a, b)",a:"3",b:"4"},note:'第 2 行：调用 add(3, 4)——参数 a 接住 3，b 接住 4，函数开始干活。'},
+{line:2,vars:{add:"ƒ (a, b)",a:"3",b:"4",result:"7"},note:'函数返回 3 + 4 = 7，result 盒子接住这个返回值。'},
+{line:3,vars:{add:"ƒ (a, b)",a:"3",b:"4",result:"7"},out:`7`,note:'第 3 行：打印 result，输出 7。'}
+]}}
+],
+java:[
+{id:'java-main', title:'程序结构与 main 方法', dur:'8 分钟', points:[
+  {t:'一切皆类', d:'Java 程序必须放在 class（类）里，文件名要和 public 类名一致。'},
+  {t:'main 是入口', d:'public static void main(String[] args) 是程序的起点，JVM 从这里开始执行。'},
+  {t:'System.out.println', d:'输出语句，println 打印后自动换行，print 则不换行。'}
+],
+demo:{file:'Main.java', code:`public class Main {
+  public static void main(String[] args) {
+    System.out.println("你好，Java");
+  }
+}`,
+steps:[
+{line:0,vars:{},note:'第 1 行：声明公开类 Main，整个程序都装在这个“集装箱”里。'},
+{line:1,vars:{},note:'第 2 行：定义 main 方法——这是程序的“大门”，JVM 运行时从这里进入。'},
+{line:2,vars:{},out:`你好，Java`,note:'第 3 行：println 把字符串打印到控制台并换行。'},
+{line:3,vars:{},note:'第 4 行：main 方法结束，程序运行完毕。'}
+]}},
+{id:'java-type', title:'变量与数据类型', dur:'9 分钟', points:[
+  {t:'强类型声明', d:'Java 变量必须先声明类型：int、double、String、boolean，类型错了编译器直接报错。'},
+  {t:'String 是类', d:'String 不是基本类型，它是一个类，所以大写开头，用双引号。'},
+  {t:'分号结尾', d:'Java 每条语句必须以分号 ; 结尾，这是语法硬性要求。'}
+],
+demo:{file:'Vars.java', code:`int age = 16;
+double height = 1.75;
+String name = "小码";
+boolean ok = true;
+System.out.println(name + " " + age);`,
+steps:[
+{line:0,vars:{age:"16"},note:'第 1 行：int 型变量 age，装整数 16。'},
+{line:1,vars:{age:"16",height:"1.75"},note:'第 2 行：double 型 height，可以装小数。'},
+{line:2,vars:{age:"16",height:"1.75",name:"'小码'"},note:'第 3 行：String 型 name，装字符串。'},
+{line:3,vars:{age:"16",height:"1.75",name:"'小码'",ok:"true"},note:'第 4 行：boolean 型 ok，只装 true / false。'},
+{line:4,vars:{age:"16",height:"1.75",name:"'小码'",ok:"true"},out:`小码 16`,note:'第 5 行：+ 号拼接字符串，输出“小码 16”。'}
+]}},
+{id:'java-if', title:'if-else 判断成绩', dur:'10 分钟', points:[
+  {t:'if / else if / else', d:'Java 的 if 判断和多数语言类似，else if 可以连续多个，条件从上往下匹配。'},
+  {t:'大括号圈定代码块', d:'每个分支用 { } 圈起来，分支内可以有多条语句。'},
+  {t:'关系运算符', d:'&gt;=、&lt;=、== 都是关系运算，结果是 boolean 值。'}
+],
+demo:{file:'Grade.java', code:`int score = 85;
+if (score >= 90) {
+  System.out.println("优秀");
+} else if (score >= 80) {
+  System.out.println("良好");
+} else {
+  System.out.println("加油");
+}`,
+steps:[
+{line:0,vars:{score:"85"},note:'第 1 行：score 装 85。'},
+{line:1,vars:{score:"85"},note:'第 2 行：85 &gt;= 90 不成立，跳过“优秀”分支。'},
+{line:4,vars:{score:"85"},note:'第 5 行：检查 85 &gt;= 80，成立，进入“良好”分支。'},
+{line:5,vars:{score:"85"},out:`良好`,note:'第 6 行：输出“良好”。后面的 else 不会执行。'},
+{line:7,vars:{score:"85"},note:'第 8 行：else 兜底分支被整体跳过。'}
+]}},
+{id:'java-loop', title:'for 循环', dur:'10 分钟', points:[
+  {t:'for 三部分', d:'for (int i = 1; i &lt;= 5; i++)：初始化、条件、步进，分号分隔。'},
+  {t:'循环变量作用域', d:'int i 在循环内声明，循环结束后 i 就“消失”了，外面访问不到。'},
+  {t:'复合赋值', d:'sum += i 等价于 sum = sum + i，是累加的简写。'}
+],
+demo:{file:'Sum.java', code:`int sum = 0;
+for (int i = 1; i <= 5; i++) {
+  sum += i;
+}
+System.out.println(sum);`,
+steps:[
+{line:0,vars:{sum:"0"},note:'第 1 行：sum 记账本从 0 开始。'},
+{line:1,vars:{sum:"0",i:"1"},note:'第 2 行：i 初始化为 1，1 &lt;= 5 成立，进入循环。'},
+{line:2,vars:{sum:"1",i:"1"},note:'第 3 行：sum = 0 + 1 = 1。'},
+{line:1,vars:{sum:"10",i:"5"},note:'循环继续：i 增到 5，sum 累加到 10。'},
+{line:2,vars:{sum:"15",i:"5"},note:'最后一次累加：10 + 5 = 15。'},
+{line:3,vars:{sum:"15"},out:`15`,note:'i++ 后 i 变 6，条件不成立，循环结束，打印 15。'}
+]}},
+{id:'java-array', title:'数组与遍历', dur:'10 分钟', points:[
+  {t:'数组定长', d:'int[] nums = {3,1,2} 创建定长数组，长度创建后固定。'},
+  {t:'增强 for', d:'for (int n : nums) 依次取出每个元素到变量 n，无需管下标，最安全。'},
+  {t:'索引从 0 开始', d:'nums[0] 是第一个元素，数组越界会抛 ArrayIndexOutOfBoundsException。'}
+],
+demo:{file:'Arr.java', code:`int[] nums = {3, 1, 2};
+int total = 0;
+for (int n : nums) {
+  total += n;
+}
+System.out.println(total);`,
+steps:[
+{line:0,vars:{nums:"[3, 1, 2]"},note:'第 1 行：创建数组，装 3 个整数。'},
+{line:1,vars:{nums:"[3, 1, 2]",total:"0"},note:'第 2 行：total 记账本归零。'},
+{line:2,vars:{nums:"[3, 1, 2]",total:"0",n:"3"},note:'第 3 行：增强 for 取出第一个元素 3 给变量 n。'},
+{line:3,vars:{nums:"[3, 1, 2]",total:"3",n:"3"},note:'第 4 行：total = 0 + 3 = 3。'},
+{line:2,vars:{nums:"[3, 1, 2]",total:"6",n:"2"},note:'循环继续：n 取到 2，total 累加为 6。'},
+{line:3,vars:{nums:"[3, 1, 2]",total:"6",n:"2"},note:'第 4 行：total = 3 + 3 + 2... 逐步累加。'},
+{line:2,vars:{nums:"[3, 1, 2]",total:"6",n:"2"},note:'再取最后一个元素 1，total 变为 6 + ... 让我们跳到结果。'},
+{line:5,vars:{nums:"[3, 1, 2]",total:"6"},out:`6`,note:'第 6 行：遍历完三个元素，total = 3 + 1 + 2 = 6，打印结果。'}
+]}},
+{id:'java-fn', title:'方法与返回值', dur:'9 分钟', points:[
+  {t:'方法 = 函数', d:'Java 里函数叫方法，必须定义在类里面，用 static 修饰则可以直接通过类名调用。'},
+  {t:'形参与实参', d:'定义时的参数叫形参，调用时传的值叫实参，两者按位置一一对应。'},
+  {t:'return 返回', d:'方法声明 int 就必须 return 一个 int 值，否则编译报错。'}
+],
+demo:{file:'Method.java', code:`static int add(int a, int b) {
+  return a + b;
+}
+
+public static void main(String[] args) {
+  int result = add(3, 4);
+  System.out.println(result);
+}`,
+steps:[
+{line:0,vars:{},note:'第 1 行：定义 add 方法，接收两个 int，返回它们的和。此刻只是“说明书”，不执行。'},
+{line:4,vars:{a:"3",b:"4"},note:'第 5 行：main 里调用 add(3, 4)，实参 3 传给形参 a，4 传给 b。'},
+{line:1,vars:{a:"3",b:"4"},note:'第 2 行：return 计算 3 + 4 = 7，把结果送回调用处。'},
+{line:5,vars:{a:"3",b:"4",result:"7"},note:'第 6 行：返回值 7 被 result 接住。'},
+{line:6,vars:{a:"3",b:"4",result:"7"},out:`7`,note:'第 7 行：打印 7。'}
+]}}
+],
+cpp:[
+{id:'cpp-main', title:'程序结构与 cout', dur:'8 分钟', points:[
+  {t:'头文件引入', d:'#include &lt;iostream&gt; 引入输入输出库，iostream 就是“输入输出流”。'},
+  {t:'main 函数入口', d:'int main() 是程序入口，return 0 表示程序正常结束。'},
+  {t:'cout 输出', d:'cout &lt;&lt; "内容" &lt;&lt; endl 把内容输出并换行，&lt;&lt; 是“送入流”的运算符。'}
+],
+demo:{file:'hello.cpp', code:`#include <iostream>
+using namespace std;
+
+int main() {
+  cout << "你好，C++" << endl;
+  return 0;
+}`,
+steps:[
+{line:0,vars:{},note:'第 1 行：引入 iostream 头文件——相当于借来一个“输出工具箱”。'},
+{line:1,vars:{},note:'第 2 行：声明使用标准命名空间，之后就能直接用 cout 而不用写 std::cout。'},
+{line:3,vars:{},note:'第 4 行：main 函数——程序从这里开始运行。'},
+{line:4,vars:{},out:`你好，C++`,note:'第 5 行：cout 把字符串“送入”输出流，endl 换行，屏幕上出现“你好，C++”。'},
+{line:5,vars:{},note:'第 6 行：return 0 告诉系统：程序圆满结束。'}
+]}},
+{id:'cpp-type', title:'变量与基础类型', dur:'9 分钟', points:[
+  {t:'类型即内存规格', d:'int、double、char、bool 各自占用不同大小的内存，声明类型就是给盒子定规格。'},
+  {t:'char 是单字符', d:'char grade = \'A\' 用单引号包单个字符，字符串才用双引号。'},
+  {t:'bool 是逻辑开关', d:'bool 只存 true / false，常用于条件判断。'}
+],
+demo:{file:'vars.cpp', code:`int age = 16;
+double height = 1.75;
+char grade = 'A';
+bool isOk = true;
+cout << age << " " << grade << endl;`,
+steps:[
+{line:0,vars:{age:"16"},note:'第 1 行：int 盒子装整数 16。'},
+{line:1,vars:{age:"16",height:"1.75"},note:'第 2 行：double 盒子装小数 1.75。'},
+{line:2,vars:{age:"16",height:"1.75",grade:"'A'"},note:'第 3 行：char 盒子装单个字符 A，用单引号。'},
+{line:3,vars:{age:"16",height:"1.75",grade:"'A'",isOk:"true"},note:'第 4 行：bool 开关置为 true。'},
+{line:4,vars:{age:"16",height:"1.75",grade:"'A'",isOk:"true"},out:`16 A`,note:'第 5 行：cout 连续输出 age、空格、grade，得到“16 A”。'}
+]}},
+{id:'cpp-if', title:'if 判断奇偶', dur:'9 分钟', points:[
+  {t:'取模运算符 %', d:'num % 2 求余数：偶数余 0，奇数余 1，这是判断奇偶的经典手法。'},
+  {t:'== 是相等判断', d:'== 比较两边的值是否相等，返回 true / false；单个 = 是赋值，别写混。'},
+  {t:'else 兜底', d:'if 不成立时执行 else 分支，两个分支必走其一。'}
+],
+demo:{file:'odd.cpp', code:`int num = 7;
+if (num % 2 == 0) {
+  cout << "偶数" << endl;
+} else {
+  cout << "奇数" << endl;
+}`,
+steps:[
+{line:0,vars:{num:"7"},note:'第 1 行：num 装 7。'},
+{line:1,vars:{num:"7"},note:'第 2 行：计算 7 % 2 得余数 1，1 == 0 不成立，跳过 if 分支。'},
+{line:4,vars:{num:"7"},out:`奇数`,note:'第 5 行：进入 else 分支，输出“奇数”。'}
+]}},
+{id:'cpp-loop', title:'for 循环累加', dur:'10 分钟', points:[
+  {t:'for 三部分', d:'for (int i = 1; i &lt;= 10; i++) 同样是初始化、条件、步进。'},
+  {t:'块作用域', d:'i 在循环块内声明，作用域只限循环内，结束后不可见。'},
+  {t:'累加器', d:'sum += i 每次循环把 i 加进 sum，循环结束即得到总和。'}
+],
+demo:{file:'sum.cpp', code:`int sum = 0;
+for (int i = 1; i <= 10; i++) {
+  sum += i;
+}
+cout << sum << endl;`,
+steps:[
+{line:0,vars:{sum:"0"},note:'第 1 行：sum 从 0 开始记账。'},
+{line:1,vars:{sum:"0",i:"1"},note:'第 2 行：i = 1，1 &lt;= 10 成立，进入循环。'},
+{line:2,vars:{sum:"1",i:"1"},note:'第 3 行：sum = 0 + 1 = 1。'},
+{line:1,vars:{sum:"45",i:"10"},note:'循环飞速转圈，i 一路到 10，sum 累加到 45。'},
+{line:2,vars:{sum:"55",i:"10"},note:'最后一次：45 + 10 = 55，1 到 10 的总和。'},
+{line:3,vars:{sum:"55"},out:`55`,note:'i++ 变 11 后条件不成立，循环结束，输出 55。'}
+]}},
+{id:'cpp-vector', title:'vector 动态数组', dur:'11 分钟', points:[
+  {t:'vector 可伸缩', d:'普通数组定长，vector 可以动态增长，push_back 往末尾添加元素。'},
+  {t:'需要引入头文件', d:'使用 vector 要先 #include &lt;vector&gt;。'},
+  {t:'size() 查长度', d:'v.size() 返回当前元素个数，是方法所以要加括号。'}
+],
+demo:{file:'vec.cpp', code:`#include <vector>
+vector<int> nums;
+nums.push_back(3);
+nums.push_back(1);
+nums.push_back(2);
+cout << nums.size() << endl;`,
+steps:[
+{line:0,vars:{},note:'第 1 行：引入 vector 头文件。'},
+{line:1,vars:{nums:"[]"},note:'第 2 行：创建一个空的整数 vector，像一条可以随时加长的货架。'},
+{line:2,vars:{nums:"[3]"},note:'第 3 行：push_back(3) 把 3 挂到货架末尾。'},
+{line:3,vars:{nums:"[3, 1]"},note:'第 4 行：再追加 1，货架自动变长。'},
+{line:4,vars:{nums:"[3, 1, 2]"},note:'第 5 行：追加 2，现在货架上有 3 个元素。'},
+{line:5,vars:{nums:"[3, 1, 2]"},out:`3`,note:'第 6 行：size() 报出元素个数 3。'}
+]}},
+{id:'cpp-fn', title:'函数与返回值', dur:'9 分钟', points:[
+  {t:'函数签名带类型', d:'int square(int x) 声明参数和返回值的类型，C++ 是强类型语言。'},
+  {t:'先声明后使用', d:'函数要在调用之前定义（或先声明），否则编译器不认识。'},
+  {t:'return 提前结束', d:'执行到 return 时函数立刻结束并把值送回调用处。'}
+],
+demo:{file:'square.cpp', code:`int square(int x) {
+  return x * x;
+}
+int main() {
+  int r = square(5);
+  cout << r << endl;
+  return 0;
+}`,
+steps:[
+{line:0,vars:{},note:'第 1 行：定义 square 函数，输入一个整数，返回它的平方。'},
+{line:3,vars:{x:"5"},note:'第 4 行：main 中调用 square(5)，形参 x 接住 5。'},
+{line:1,vars:{x:"5"},note:'第 2 行：return 计算 5 × 5 = 25，函数结束并送回结果。'},
+{line:4,vars:{x:"5",r:"25"},note:'第 5 行：25 被 r 接住。'},
+{line:5,vars:{x:"5",r:"25"},out:`25`,note:'第 6 行：输出 25。'}
+]}}
+],
+go:[
+{id:'go-main', title:'程序结构与 fmt', dur:'8 分钟', points:[
+  {t:'包与 main 函数', d:'每个 Go 程序都从 package main 开始，func main() 是入口函数。'},
+  {t:'导入用 import', d:'import "fmt" 引入格式化输入输出包，fmt 是 Go 的标准“打印工具箱”。'},
+  {t:'Println 输出', d:'fmt.Println() 打印内容并自动换行，Go 对缩进用制表符有强制要求（gofmt）。'}
+],
+demo:{file:'main.go', code:`package main
+
+import "fmt"
+
+func main() {
+  fmt.Println("你好，Go")
+}`,
+steps:[
+{line:0,vars:{},note:'第 1 行：声明包名 main——可执行程序的起点。'},
+{line:2,vars:{},note:'第 3 行：导入 fmt 包，之后就能用 fmt.Println 打印了。'},
+{line:4,vars:{},note:'第 5 行：main 函数——程序从这里执行。'},
+{line:5,vars:{},out:`你好，Go`,note:'第 6 行：fmt.Println 输出“你好，Go”。'}
+]}},
+{id:'go-var', title:'变量与类型推断', dur:'9 分钟', points:[
+  {t:'var 显式声明', d:'var name string = "小码" 完整声明变量名、类型、值。'},
+  {t:':= 自动推断', d:'age := 16 用短声明，编译器根据右边的值自动推断类型，简洁又安全。'},
+  {t:'强类型', d:'Go 是静态强类型，类型不匹配会在编译期报错，而不是运行时才炸。'}
+],
+demo:{file:'vars.go', code:`var name string = "小码"
+age := 16
+height := 1.75
+fmt.Println(name, age, height)`,
+steps:[
+{line:0,vars:{name:"'小码'"},note:'第 1 行：var 完整声明，明确告诉编译器 name 是 string 类型。'},
+{line:1,vars:{name:"'小码'",age:"16"},note:'第 2 行：:= 短声明，编译器看右边是整数，自动推断 age 为 int。'},
+{line:2,vars:{name:"'小码'",age:"16",height:"1.75"},note:'第 3 行：同理推断 height 是小数类型（float64）。'},
+{line:3,vars:{name:"'小码'",age:"16",height:"1.75"},out:`小码 16 1.75`,note:'第 4 行：一次打印三个变量，空格自动分隔。'}
+]}},
+{id:'go-if', title:'if 条件判断', dur:'9 分钟', points:[
+  {t:'if 不需要括号', d:'Go 的 if 条件直接写，不用圆括号，但大括号不能省、必须跟在同行。'},
+  {t:'else 必须紧跟', d:'Go 规定 else 必须和 if 的右大括号在同一行，换行会编译报错。'},
+  {t:'比较即布尔', d:'条件表达式的结果必须是布尔值 true / false。'}
+],
+demo:{file:'score.go', code:`score := 92
+if score >= 90 {
+  fmt.Println("优秀")
+} else {
+  fmt.Println("继续加油")
+}`,
+steps:[
+{line:0,vars:{score:"92"},note:'第 1 行：score 推断为 92。'},
+{line:1,vars:{score:"92"},note:'第 2 行：92 &gt;= 90 成立，进入 if 分支。'},
+{line:2,vars:{score:"92"},out:`优秀`,note:'第 3 行：输出“优秀”，else 分支被跳过。'}
+]}},
+{id:'go-loop', title:'for 循环（Go 只有 for）', dur:'10 分钟', points:[
+  {t:'唯一循环关键字', d:'Go 没有 while，所有循环都用 for 表达——条件式写法就是 while 的替代。'},
+  {t:'三部分语法', d:'for i := 1; i &lt;= 5; i++ 初始化、条件、步进，分号分隔。'},
+  {t:'变量作用域', d:'i 在 for 内声明，循环结束后不可见，Go 编译器会拦截“未使用变量”。'}
+],
+demo:{file:'sum.go', code:`sum := 0
+for i := 1; i <= 5; i++ {
+  sum += i
+}
+fmt.Println(sum)`,
+steps:[
+{line:0,vars:{sum:"0"},note:'第 1 行：sum 记账本归零。'},
+{line:1,vars:{sum:"0",i:"1"},note:'第 2 行：i = 1，1 &lt;= 5 成立，进入循环体。'},
+{line:2,vars:{sum:"1",i:"1"},note:'第 3 行：sum = 0 + 1 = 1。'},
+{line:1,vars:{sum:"10",i:"5"},note:'循环推进：i 到 5，sum 累加到 10。'},
+{line:2,vars:{sum:"15",i:"5"},note:'最后一次：10 + 5 = 15。'},
+{line:3,vars:{sum:"15"},out:`15`,note:'i++ 变 6 后条件不成立，循环结束，输出 15。'}
+]}},
+{id:'go-slice', title:'切片与 range 遍历', dur:'11 分钟', points:[
+  {t:'切片是动态数组', d:'[]int{3,1,2} 创建切片，append() 可以动态添加元素，返回新切片。'},
+  {t:'range 遍历', d:'for _, n := range nums 依次取出元素；下划线 _ 表示“这个位置的值我不要”。'},
+  {t:'append 返回值要接住', d:'append 返回新切片，必须重新赋值：nums = append(nums, 4)。'}
+],
+demo:{file:'slice.go', code:`nums := []int{3, 1, 2}
+nums = append(nums, 4)
+for _, n := range nums {
+  fmt.Println(n)
+}`,
+steps:[
+{line:0,vars:{nums:"[3, 1, 2]"},note:'第 1 行：创建切片，装 3 个整数。'},
+{line:1,vars:{nums:"[3, 1, 2, 4]"},note:'第 2 行：append 追加 4，新切片 [3,1,2,4] 重新赋给 nums。'},
+{line:2,vars:{nums:"[3, 1, 2, 4]",n:"3"},note:'第 3 行：range 取出第一个元素 3，下划线丢弃索引。'},
+{line:3,vars:{nums:"[3, 1, 2, 4]",n:"3"},out:`3`,note:'第 4 行：打印 3。'},
+{line:2,vars:{nums:"[3, 1, 2, 4]",n:"4"},note:'遍历继续（中间 1、2 同理）：取到最后一个元素 4。'},
+{line:3,vars:{nums:"[3, 1, 2, 4]",n:"4"},out:`4`,note:'第 4 行：打印 4。遍历结束，每个元素都被打印了一遍。'}
+]}},
+{id:'go-fn', title:'函数与多返回值', dur:'9 分钟', points:[
+  {t:'多返回值是 Go 特色', d:'func swap(a, b int) (int, int) 可以同时返回两个值，调用时用 x, y := 接住。'},
+  {t:'类型写在变量后', d:'Go 把类型写在参数名后面，和其他语言习惯相反。'},
+  {t:'简洁赋值', d:'x, y := swap(1, 2) 一行同时拿到两个返回值。'}
+],
+demo:{file:'swap.go', code:`func swap(a, b int) (int, int) {
+  return b, a
+}
+func main() {
+  x, y := swap(1, 2)
+  fmt.Println(x, y)
+}`,
+steps:[
+{line:0,vars:{},note:'第 1 行：定义 swap 函数，接收两个整数，返回两个整数（把顺序调换）。'},
+{line:3,vars:{a:"1",b:"2"},note:'第 4 行：调用 swap(1, 2)，a 接 1，b 接 2。'},
+{line:1,vars:{a:"1",b:"2"},note:'第 2 行：return b, a 同时送回 2 和 1。'},
+{line:4,vars:{a:"1",b:"2",x:"2",y:"1"},note:'第 5 行：两个返回值分别被 x、y 接住——x = 2，y = 1。'},
+{line:5,vars:{a:"1",b:"2",x:"2",y:"1"},out:`2 1`,note:'第 6 行：打印 x 和 y，输出“2 1”。交换成功。'}
+]}}
+]
+};
+</script>
+
+<!-- ===== 数据：习题 ===== -->
+<script>
+/* ================= 习题数据 =================
+ * diff: easy/mid/hard · ans: 正确答案下标(0起) · story: 拟人比喻讲解 · steps: 逐步推理 · key: 知识点
+ */
+const QUIZ = {
+python:[
+{diff:'easy',q:'运行下列代码，最终打印结果是？',code:`s = "python"
+new_s = s.replace("p", "P")
+print(s)`,options:['Python','python','Ppython','报错'],ans:1,
+story:'想象 replace 是一台<strong>复印机</strong>：你递给它写着 python 的原件 s，它唰唰复印出一张新纸 new_s，复印时顺手把小写 p 改成了大写 P。但重点是——<strong>原件 s 从头到尾没有被碰过</strong>！复印机永远不会修改原件。所以最后打印 s 时，屏幕上还是那张原封不动的旧字条：python。',
+steps:['s 存的是原字符串 "python"','replace 生成新字符串 "Python" 给 new_s，不修改 s','print(s) 打印的是原变量 s，所以是 python'],
+key:'字符串是不可变类型，replace 等方法都会返回新字符串，原字符串保持不变。',tip:'看到 replace/upper/lower 这类“修改”方法，先问自己：它改的是原字符串，还是返回了新字符串？'},
+{diff:'easy',q:'下面代码执行后，变量 y 的值是？',code:`x = 5
+y = x + 2
+print(x)`,options:['5','7','2','报错'],ans:0,
+story:'变量就像贴标签的盒子：x 盒子里装着 5，然后计算机<strong>又开了一个新盒子 y</strong>，把“5+2 算出的 7”放进去。整个过程 x 盒子纹丝不动。打印 x，看到的当然是它盒子里的原值 5。记住：把 x 拿去参与计算，并不会“掏空”x。',
+steps:['x 盒子里装 5','y 是新盒子，装的是 5+2=7','print(x) 只看 x 盒子：5'],
+key:'把变量放进表达式计算，不会改变变量本身的值；新结果需要新的变量来接。'},
+{diff:'easy',q:'print(type(3.14)) 的输出结果是？',code:`print(type(3.14))`,options:["<class 'int'>","<class 'float'>","<class 'str'>","报错"],ans:1,
+story:'type() 是 Python 的<strong>验货员</strong>，专门检查盒子里装的是什么类型。3.14 带着小数点，是标准的小数类型 float。整数不带点、字符串带引号、布尔是真假——验货员一眼就能认出来。',
+steps:['3.14 是带小数点的数字','type() 返回它的类型名','结果是 <class \'float\'>'],
+key:'带小数点的数字在 Python 中是 float 类型，type() 可以查看任意值的类型。'},
+{diff:'easy',q:'print(True and False) 的输出是？',code:`print(True and False)`,options:['True','False','None','报错'],ans:1,
+story:'and 是一个<strong>严格的守门员</strong>：想要 True 通过，两个队员（左右两边）必须都点头。现在左边 True 点头了，右边 False 摇头——守门员直接放行 False。只有两边都是 True，结果才是 True。',
+steps:['and 要求两边都为 True 才返回 True','True 和 False 有一边不满足','结果是 False'],
+key:'and 一假即假，or 一真即真；not 负责取反。'},
+{diff:'mid',q:'运行下面代码，控制台会打印出什么？',code:`for i in range(3):
+    print(i)`,options:['1 2 3','0 1 2','0 1 2 3','3 3 3'],ans:1,
+story:'range(3) 像一条<strong>编号从 0 开始的传送带</strong>：它只生产 0、1、2 三个编号，生产完 2 就收工了（3 不在名单上）。传送带把每个编号依次递给变量 i，循环体打印一次。所以输出是 0 1 2，每行一个。',
+steps:['range(3) 生成 0、1、2 三个数','循环依次取 i = 0、1、2','每个 i 打印一次，共三行'],
+key:'range(n) 从 0 开始，到 n-1 结束，一共 n 个数——左闭右开。'},
+{diff:'mid',q:'下面代码执行后，print(len(nums)) 输出？',code:`nums = [1, 2, 3]
+nums.append(4)
+print(len(nums))`,options:['3','4','5','报错'],ans:1,
+story:'nums 是一条<strong>货架</strong>，一开始摆着 1、2、3 三件货。append(4) 就是又往货架末尾补了一件货，现在有四件。len() 像仓库管理员，数一遍货架上的商品数，报出 4。',
+steps:['nums 初始有 3 个元素','append(4) 追加一个，变成 4 个','len(nums) 数出长度 4'],
+key:'append 在列表末尾追加元素；len() 返回元素个数。'},
+{diff:'mid',q:'运行下列代码，会打印什么？',code:`score = 75
+if score >= 90:
+    print("优秀")
+elif score >= 60:
+    print("及格")
+else:
+    print("不及格")`,options:['优秀','及格','不及格','什么都不打印'],ans:1,
+story:'这是一场<strong>分数闯关</strong>：75 分先来到第一道门“90 分以上？”——不够，被拦下；接着来到第二道门“60 分以上？”——够了，通关！于是打印“及格”。闯关成功后，后面的关卡（else）连看都不看。',
+steps:['75 >= 90 不成立，跳过优秀','75 >= 60 成立，进入及格分支','打印“及格”，else 被跳过'],
+key:'if/elif/else 从上往下匹配，命中一个分支后其余全部跳过。'},
+{diff:'mid',q:'print("ab" * 3) 的输出是？',code:`print("ab" * 3)`,options:['ababab','abab','ab*3','报错'],ans:0,
+story:'字符串里的 <strong>* 是一台复制机</strong>：把 "ab" 这张字条放进机器，按下“复印 3 份”按钮，机器咔咔吐出三张连在一起——ababab。数字和字符串相乘在 Python 里就是“重复多少次”的意思。',
+steps:['"ab" * 3 表示把 "ab" 重复 3 次','拼接结果 ababab','打印输出 ababab'],
+key:'字符串乘整数 = 字符串重复 N 次；这是 Python 的语法糖。'},
+{diff:'hard',q:'nums = [10, 20, 30, 40]，nums[1:3] 的结果是？',code:`nums = [10, 20, 30, 40]
+print(nums[1:3])`,options:['[20, 30]','[10, 20]','[20, 30, 40]','[30, 40]'],ans:0,
+story:'切片像<strong>从货架上抽出一段</strong>：nums[1:3] 的意思是“从下标 1 开始拿，拿到下标 3 之前为止”。下标 1 是 20，下标 2 是 30，下标 3 是 40 但不拿（到 3 就停手）。所以抽出的是 [20, 30]。记住口诀：<strong>含头不含尾</strong>。',
+steps:['下标：10(0) 20(1) 30(2) 40(3)','切片从下标 1 到 2（3 不包含）','结果是 [20, 30]'],
+key:'切片 list[a:b] 包含下标 a，不包含下标 b——左闭右开。'},
+{diff:'hard',q:'运行下列代码，最终打印结果是？',code:`x = 10
+def change():
+    x = 5
+change()
+print(x)`,options:['5','10','报错','None'],ans:1,
+story:'函数里的 x 和函数外的 x 是<strong>两个同名但不同屋的盒子</strong>：函数 change 在它自己屋里开了个 x 盒子装 5，这相当于关起门来自己记账，和外面大厅里那个装 10 的 x 毫无关系。函数执行完，屋里的盒子销毁，外面的 x 依然是 10。',
+steps:['全局 x 装 10','change() 内部创建局部 x = 5，不影响全局','打印全局 x，还是 10'],
+key:'函数内部默认创建局部变量，不会修改同名全局变量；要改全局需用 global 声明。'},
+{diff:'mid',q:'运行以下代码，输出结果是什么？',code:`data = {1, 2, 2, 3, 3, 3}
+data.add(2)
+print(len(data))`,options:['6','3','4','5'],ans:1,
+story:'集合 set 是一个<strong>自动去重的仓库</strong>：放进一堆货，它只保留每种一个。{1,2,2,3,3,3} 进仓后实际只存了 1、2、3 三件。再 add(2)——2 已经在仓里了，仓库摇摇头"重复了，不收"。所以 len 数出来还是 3。',
+steps:['集合自动去重，只剩 1、2、3','add(2) 发现已存在，不做任何事','len(data) = 3'],
+key:'集合元素唯一，add 重复元素不会报错也不会新增；len 数的是不同元素个数。'},
+{diff:'easy',q:'以下 Python 代码的输出结果是什么？',code:`print("abc".upper())`,options:['"Abc"','"ABC"','"abc"','报错'],ans:1,
+story:'upper() 是一台<strong>全大写转换器</strong>：把 "abc" 递进去，它咔咔把每个字母都改成大写，吐出 "ABC"。注意它生成的是一个<strong>新字符串</strong>，原件 "abc" 原样不动，但这里直接打印新结果，所以是 "ABC"。',
+steps:['upper() 把所有字母转大写','abc → ABC','打印输出 "ABC"'],
+key:'upper() 转全大写，lower() 转全小写，它们都返回新字符串。'},
+{diff:'mid',q:'以下 Python 代码的输出结果是什么？',code:`x = 10
+def foo():
+    x = 20
+foo()
+print(x)`,options:['10','20','None','报错'],ans:0,
+story:'函数 foo 屋里的 x 和屋外的 x 是<strong>两个互不相干的盒子</strong>：foo 在自己屋里把 x 装成 20，这关起门来的记账跟外面那个装 10 的 x 毫无关系。foo() 执行完，屋里的盒子就扔了。外面 print 的还是 10。',
+steps:['全局 x = 10','foo 内部创建局部 x = 20，不碰全局','打印全局 x = 10'],
+key:'函数内直接赋值会创建局部变量；要修改全局变量需要 global 声明。'},
+{diff:'hard',q:'运行以下代码，输出结果是什么？',code:`a = [1, 2]
+b = a
+b.append(3)
+print(a)`,options:['[1, 2, 3]','[1, 2]','[1, 2, []]','报错'],ans:0,
+story:'b = a 不是<strong>复印一份新列表</strong>，而是给同一个列表<strong>多贴了一张标签</strong>。a 和 b 指向货架上同一批货。通过 b 往货架末尾 append(3)，a 转头看自己的货架——3 已经摆上去了。所以 a 也变成 [1,2,3]。',
+steps:['b 和 a 指向同一个列表','b.append(3) 在原列表上追加','a 看到的是同一个列表：[1,2,3]'],
+key:'列表赋值是引用传递，两个变量指向同一对象；修改一个会影响另一个。',tip:'想真正复制一份列表，用 a.copy() 或 a[:]。'},
+{diff:'easy',q:'运行以下代码，输出结果是什么？',code:`d = {'a': 1, 'b': 2}
+print(d['b'])`,options:['1','2','b','KeyError'],ans:1,
+story:'字典像一本<strong>通讯录</strong>：方括号里写钥匙（键），它就翻到那一页把对应的值递出来。d["b"] 拿着 "b" 这把钥匙，打开写着 2 的那一格，所以打印 2。',
+steps:['字典按键取值','d["b"] 找到键 b 对应的值','值是 2'],
+key:'字典用 d[key] 取值；键不存在会报 KeyError，用 d.get(key) 更安全。'},
+{diff:'mid',q:'运行以下代码，输出结果是什么？',code:`nums = [[1, 2], [3, 4]]
+print(len(nums))`,options:['4','2','报错','[1, 2]'],ans:1,
+story:'len() 是个<strong>只数最外层的仓库管理员</strong>：nums 这个大货架上摆着两件货——第一格子 [1,2]、第二格子 [3,4]。管理员不拆开格子数里面的小东西，只数最外层有几个：2。',
+steps:['nums 是包含两个列表的列表','len 数最外层元素个数','外层有 2 个元素'],
+key:'len() 返回最外层的元素个数；数嵌套内部要再访问一层。'},
+{diff:'easy',q:'print(7 // 2) 的输出是？',code:`print(7 // 2)`,options:['3.5','3','4','3.0'],ans:1,
+story:'// 是<strong>地板除法</strong>：只取商的整数部分，小数部分直接"砍掉扔地上"。7 除以 2 本来是 3.5，但地板只留脚下的 3，小数 .5 被丢掉。所以结果是整数 3。',
+steps:['7/2 = 3.5','// 向下去掉小数部分','结果是 3'],
+key:'// 整数除法（向下取整）；普通 / 得到浮点数 3.5。'},
+{diff:'easy',q:'print(10 % 3) 的输出是？',code:`print(10 % 3)`,options:['3','1','0','3.33'],ans:1,
+story:'% 是<strong>取余器</strong>：算完除法后，把"除不尽剩下的那点"递出来。10 里能拿出 3 个 3（3×3=9），还剩 10-9=1。这个 1 就是余数。',
+steps:['3×3=9','10-9=1','余数是 1'],
+key:'% 返回除法余数；偶数判断 n%2==0 就靠它。'},
+{diff:'easy',q:'s = "python"，print(s[0]) 输出？',code:`s = "python"
+print(s[0])`,options:['p','P','python','y'],ans:0,
+story:'字符串是一排<strong>编号从 0 开始的货架</strong>：第 0 位是 p，第 1 位是 y……方括号里写 0，就是伸手拿第 0 件货——p。',
+steps:['下标从 0 开始','s[0] 取第一个字符','第一个字符是 p'],
+key:'字符串下标从 0 开始；s[0] 是第一个字符。'},
+{diff:'easy',q:'s = "python"，print(s[-1]) 输出？',code:`s = "python"
+print(s[-1])`,options:['p','n','o','报错'],ans:1,
+story:'负数下标是<strong>从尾巴往前数</strong>的特殊货架编号：-1 指倒数第一件货。"python" 从后往前第一件是 n，第二件是 o……',
+steps:['-1 表示倒数第一个字符','"python" 最后一个字符是 n','输出 n'],
+key:'负下标从末尾倒数：s[-1] 最后一个字符，s[-2] 倒数第二个。'},
+{diff:'mid',q:'运行以下代码，输出结果是什么？',code:`n = "5"
+print(n + n)`,options:['10','"55"','55','报错'],ans:2,
+story:'n 装的是带引号的 "5"，它是<strong>字符串</strong>，不是数字。字符串 + 字符串不干算术，改行<strong>胶水工</strong>：把 "5" 和 "5" 粘在一起，得到 "55"。注意选项里 C 是不加引号的 55——打印出来显示的就是 55。',
+steps:['"5" 是字符串，不是数字','+ 变成拼接操作','"5"+"5" = "55"，打印显示 55'],
+key:'引号里的数字是字符串；字符串相加是拼接，不是加法。',tip:'想做算术要先 int(n) 转成整数。'},
+{diff:'hard',q:'print(True + 1) 的输出是？',code:`print(True + 1)`,options:['2','1','True1','报错'],ans:0,
+story:'在 Python 里，True 和 False 是<strong>伪装成布尔的小数字</strong>：True 偷偷等于 1，False 偷偷等于 0。所以 True + 1 实际是 1 + 1 = 2。这是新手最容易踩的冷门坑。',
+steps:['True 在数值运算中等同于 1','1 + 1 = 2','输出 2'],
+key:'True==1、False==0 在 Python 中成立；布尔可以直接参与算术。'},
+{diff:'mid',q:'运行以下代码，输出结果是什么？',code:`nums = [10, 20, 30]
+nums.pop()
+print(nums)`,options:['[10, 20]','[20, 30]','[10, 20, 30]','[30]'],ans:0,
+story:'pop() 是<strong>从货架末尾取货</strong>的店员：把最后一件（30）拿走，货架上剩下 [10, 20]。pop() 默认删末尾，pop(0) 才是删开头。',
+steps:['pop() 删除并返回末尾元素 30','nums 剩 [10,20]','打印 [10, 20]'],
+key:'pop() 默认弹出末尾元素；它会改变原列表。'},
+{diff:'mid',q:'运行以下代码，输出结果是什么？',code:`s = "  hi  "
+print(len(s.strip()))`,options:['6','2','4','报错'],ans:1,
+story:'strip() 是<strong>剥洋葱皮</strong>的：把字符串首尾的空格全部剥掉。"  hi  " 剥掉前后空格后中间只剩 "hi"，两个字符。len 数出来是 2。',
+steps:['strip() 去掉首尾空格','剩下 "hi"','len("hi") = 2'],
+key:'strip() 去除首尾空白；lstrip/rstrip 只去左边/右边。'},
+{diff:'easy',q:'运行以下代码，输出结果是什么？',code:`def f():
+    return 2 + 3
+print(f())`,options:['5','23','None','报错'],ans:0,
+story:'return 是函数的<strong>交货口</strong>：算完 2+3=5，通过 return 把 5 递出来。print(f()) 拿到这个 5 打印出来。没有 return 的函数默认交回 None。',
+steps:['f() 执行 2+3','return 把结果 5 交出','打印 5'],
+key:'return 把函数计算结果返回给调用处。'},
+{diff:'mid',q:'print(1 < 2 < 3) 的输出是？',code:`print(1 < 2 < 3)`,options:['True','False','报错','None'],ans:0,
+story:'Python 支持<strong>连锁比较</strong>：1 < 2 < 3 相当于同时问"1<2 并且 2<3"。两个条件都成立，所以整体是 True。这种数学式连写是 Python 的贴心设计。',
+steps:['1<2 成立','2<3 也成立','两个都真，结果 True'],
+key:'Python 支持 a<b<c 链式比较，等价于 a<b and b<c。'},
+{diff:'mid',q:'运行以下代码，输出结果是什么？',code:`x = None
+print(x is None)`,options:['True','False','报错','None'],ans:0,
+story:'None 是 Python 里<strong>"什么都没有"的专属盒子</strong>。is 是身份检查员，专门问"它是不是这个专属盒子"。x 装的就是 None，检查员点点头：True。',
+steps:['x = None','is 判断 x 是否就是 None','是的，True'],
+key:'判断空值用 is None，而不是 == None（PEP8 推荐）。'},
+{diff:'easy',q:'运行以下代码，输出结果是什么？',code:`t = (1, 2, 3)
+print(t[1])`,options:['1','2','3','报错'],ans:1,
+story:'元组 tuple 是<strong>焊死的货架</strong>：用法和列表几乎一样按下标取货，但摆上去就不能拆改。t[1] 拿第二件货，也就是 2。',
+steps:['元组下标同样从 0 开始','t[1] 是第 2 个元素','值为 2'],
+key:'元组不可变但可按下标读取；t[0] 是第一个。'},
+{diff:'mid',q:'运行以下代码，输出结果是什么？',code:`print(list(range(0, 10, 2)))`,options:['[0, 2, 4, 6, 8]','[0, 2, 4, 6, 8, 10]','[2, 4, 6, 8]','[1, 3, 5, 7, 9]'],ans:0,
+story:'range(0, 10, 2) 是<strong>每隔 2 步发一张号牌</strong>：从 0 开始，发到 10 之前停手。0、2、4、6、8——10 本身不包含（左闭右开）。',
+steps:['从 0 开始，步长 2','0→2→4→6→8，到 10 停手','列表是 [0,2,4,6,8]'],
+key:'range(a,b,step) 含 a 不含 b，step 是步长。'},
+{diff:'hard',q:'运行以下代码，输出结果是什么？',code:`print([x * 2 for x in [1, 2, 3]])`,options:['[1, 2, 3]','[2, 4, 6]','[1, 4, 9]','报错'],ans:1,
+story:'列表推导式是<strong>流水线加工机</strong>：对 [1,2,3] 里每个 x 执行 x*2，加工完装进新列表。1→2、2→4、3→6，新列表 [2,4,6]。',
+steps:['遍历每个元素','每个乘 2','得到 [2,4,6]'],
+key:'[表达式 for 变量 in 列表] 是列表推导式，一行完成 map。'}
+],
+js:[
+{diff:'easy',q:'运行下列代码，console.log(a) 输出？',code:`let a = 5
+a = "hi"
+console.log(a)`,options:['5','hi','报错','undefined'],ans:1,
+story:'JS 的变量盒子<strong>想装什么就装什么</strong>：a 盒子里先放数字 5，第二行又把它换成字符串 "hi"——let 允许随时换内容，而且 JS 不挑食，数字、字符串随便换。所以最后打印时，盒子里是 "hi"。这就是动态类型语言的随性。',
+steps:['a 先装数字 5','重新赋值 a = "hi"，盒子换内容','打印时是 "hi"'],
+key:'let 变量可重新赋值，JS 是动态类型，变量类型跟随值变化。'},
+{diff:'easy',q:'下面代码会怎样？',code:`const pi = 3.14
+pi = 3.14159
+console.log(pi)`,options:['输出 3.14159','输出 3.14','直接报错','输出 undefined'],ans:2,
+story:'const 声明的变量是一口<strong>焊死的保险箱</strong>：pi 打开时装进 3.14，然后锁死。第二行想再往里面塞 3.14159——钥匙对不上，JS 当场报错，拒绝执行。保险箱的规矩就是：装一次，锁一生。',
+steps:['const pi 赋值后不可更改','尝试重新赋值会抛 TypeError','程序直接报错'],
+key:'const 声明常量，一旦赋值不可修改，再次赋值会报错。'},
+{diff:'easy',q:'下列代码输出什么？',code:`const name = "小码"
+console.log("你好，" + name)`,options:['你好，小码','你好，name','你好+小码','报错'],ans:0,
+story:'+ 号在字符串面前会变身<strong>胶水工</strong>：看到两边有字符串，它就不做算术了，而是把 "你好，" 和 "小码" 严丝合缝地粘在一起，变成一句话“你好，小码”。这就是字符串拼接。',
+steps:['字符串用 + 拼接','"你好，" + "小码" = "你好，小码"','打印出来'],
+key:'+ 遇字符串执行拼接而非加法；模板字符串 `...${var}` 是更现代的写法。'},
+{diff:'mid',q:'console.log(3 + "4") 的输出是？',code:`console.log(3 + "4")`,options:['7','"34" 即 34','34','报错'],ans:1,
+story:'+ 号在数字和字符串之间<strong>偏心字符串</strong>：只要两边有一个是字符串，它就放弃算术改行当胶水工，把 3 和 "4" 粘成 "34"。数字 3 被强行“招安”成了字符串的一部分。这是 JS 最经典的坑之一。',
+steps:['+ 的一边是字符串 "4"','+ 变成拼接操作','3 被转成 "3"，结果是 "34"'],
+key:'JS 中 + 有一方是字符串就做拼接；数字与字符串混用要格外小心。'},
+{diff:'mid',q:'运行下列代码，打印什么？',code:`const age = 17
+const tip = age >= 18 ? "成年" : "未成年"
+console.log(tip)`,options:['成年','未成年','报错','undefined'],ans:1,
+story:'三元表达式是一个<strong>岔路口的路牌</strong>：condition ? A : B 的意思是“条件成立走 A 路，否则走 B 路”。age 是 17，17 >= 18 不成立，路牌指向 B 路——"未成年"。它就是用一行代码写 if/else 的偷懒大法。',
+steps:['判断 age >= 18：17 不满足','取冒号右边的值 "未成年"','tip 为 "未成年"'],
+key:'条件 ? 值A : 值B，成立取 A，不成立取 B，是一行版 if/else。'},
+{diff:'mid',q:'下列循环执行后，sum 是多少？',code:`let sum = 0
+for (let i = 1; i <= 5; i++) {
+  sum += i
+}
+console.log(sum)`,options:['10','15','21','5'],ans:1,
+story:'for 循环像一条<strong>自动传送带</strong>：i 从 1 出发，每过一圈加 1，一直送到 5 为止。sum 像传送带末端的收集箱，每圈把 i 丢进去：1+2+3+4+5=15。收集箱最终装着 15。',
+steps:['循环 i 取 1、2、3、4、5','sum 依次累加：1→3→6→10→15','最终 sum = 15'],
+key:'for 循环三段式：初始化、条件、步进；sum += i 是累加器标准写法。'},
+{diff:'mid',q:'下列代码输出什么？',code:`const nums = [1, 2, 3]
+const b = nums.map(n => n * 2)
+console.log(b)`,options:['[1, 2, 3]','[2, 4, 6]','[1, 4, 9]','报错'],ans:1,
+story:'map 像一位<strong>挨家挨户改造的装修队</strong>：拿着“乘以 2”的图纸，挨个敲开每个元素的房门，改造完装进一间新房子 b。原来的 nums 老房子一间都没动。装修完的新数组是 [2, 4, 6]。',
+steps:['map 对每个元素执行 n => n * 2','1→2，2→4，3→6','新数组 b = [2, 4, 6]'],
+key:'map 返回新数组，不修改原数组；参数是箭头函数 n => n * 2。'},
+{diff:'mid',q:'下列代码中 evens 的值是？',code:`const nums = [1, 2, 3, 4, 5, 6]
+const evens = nums.filter(n => n % 2 === 0)
+console.log(evens)`,options:['[1, 3, 5]','[2, 4, 6]','[1, 2, 3, 4, 5, 6]','[6, 5, 4, 3, 2, 1]'],ans:1,
+story:'filter 是一位<strong>安检员</strong>：守在门口，对每个元素喊话“你是偶数吗？是就进，不是就出去”。n % 2 === 0 是偶数的身份证。1、3、5 被拦在门外，2、4、6 顺利通过安检，组成新队伍 [2, 4, 6]。',
+steps:['filter 按条件筛选元素','n % 2 === 0 保留偶数','结果是 [2, 4, 6]'],
+key:'filter 保留使条件为 true 的元素，返回新数组；原数组不变。'},
+{diff:'hard',q:'运行下列代码，console.log(i) 输出？',code:`for (var i = 0; i < 3; i++) {
+  console.log(i)
+}
+console.log(i)`,options:['3','报错','undefined','0'],ans:0,
+story:'var 声明的 i 是<strong>满屋子乱跑的野孩子</strong>：它没有“循环专属”的笼子，循环结束后依然活在全局。循环里 i 一路跑到 2（打印 0、1、2），退出循环前又执行 i++ 变成 3，条件 3 < 3 不成立才停下。所以循环外的 i 是 3。',
+steps:['循环内打印 0、1、2','i++ 最后一次让 i 变为 3','循环外 var i 仍可见，输出 3'],
+key:'var 是函数作用域，循环外仍可见；let 是块级作用域，循环外访问会报错。'},
+{diff:'hard',q:'下列代码能正常输出吗？输出什么？',code:`sayHi()
+function sayHi() {
+  console.log("你好")
+}`,options:['报错，函数未定义','输出“你好”','输出 undefined','什么都不输出'],ans:1,
+story:'function 声明有一个<strong>“提前上岗”的特权</strong>：JS 在正式执行前会先把所有 function 声明“预习”一遍，把它们挂到内存里。所以即使 sayHi() 写在函数定义前面，执行时函数早就准备好了，正常输出“你好”。这叫函数声明提升。',
+steps:['JS 预解析阶段先登记函数 sayHi','执行到 sayHi() 时函数已存在','正常输出“你好”'],
+key:'函数声明会提升（hoisting），可以在定义前调用；函数表达式则不行。'},
+{diff:'easy',q:'运行以下代码，console.log 输出？',code:`const n = 5
+console.log(\`结果是 \${n}\`)`,options:['结果是 5','结果是 ${n}','结果是 n','报错'],ans:0,
+story:'模板字符串（反引号）是一台<strong>变量翻译机</strong>：${n} 位置的 n 会被自动替换成它的值 5。所以句子里的 ${n} 变成了 5，输出"结果是 5"。',
+steps:['反引号字符串支持 ${变量}','${n} 被替换成 5','输出"结果是 5"'],
+key:'模板字符串用反引号包裹，${} 里嵌变量或表达式。'},
+{diff:'easy',q:'运行以下代码，console.log(x) 输出？',code:`let x
+console.log(x)`,options:['null','undefined','报错','0'],ans:1,
+story:'let 声明但没赋值的盒子，里面默认放着一张<strong>"undefined（还没定义）"的标签</strong>。null 是"主动放空"，undefined 是"压根没装东西"——两者不是一回事。',
+steps:['let x 只声明没赋值','未赋值的变量默认是 undefined','打印 undefined'],
+key:'只声明未赋值的变量值为 undefined；null 是手动赋的空值。'},
+{diff:'easy',q:'const a = [1, 2, 3, 4]，console.log(a.length) 输出？',code:`const a = [1, 2, 3, 4]
+console.log(a.length)`,options:['3','4','5','报错'],ans:1,
+story:'length 是数组的<strong>计数器</strong>：数一遍货架上有几件货。[1,2,3,4] 有 4 件，计数器报 4。注意不是最后一个元素的下标（那是 3）。',
+steps:['数组有 4 个元素','length 返回元素个数','输出 4'],
+key:'array.length 是元素个数，比最后一个下标大 1。'},
+{diff:'hard',q:'console.log(typeof []) 输出什么？',code:`console.log(typeof [])`,options:['"object"','"array"','"list"','报错'],ans:0,
+story:'这是 JS 最古老的<strong>"历史遗留坑"</strong>：数组在 JS 里本质上是一种特殊对象，typeof [] 老老实实回答 "object"。想判断是不是数组要用 Array.isArray([])。',
+steps:['typeof 检查值的类型','数组在 JS 中 typeof 返回 object','输出 "object"'],
+key:'typeof [] === "object"；判断数组用 Array.isArray()。'},
+{diff:'mid',q:'console.log(parseInt("42px")) 输出？',code:`console.log(parseInt("42px"))`,options:['42','NaN','"42px"','报错'],ans:0,
+story:'parseInt 是<strong>从字符串里"抠数字"的挖掘机</strong>：从头开始挖，挖到 4、2，遇到非数字的 p 就停手，把挖出来的 42 交出来。后面的 px 它看都不看。',
+steps:['从 "42px" 开头挖数字','4、2 是数字，p 不是','返回整数 42'],
+key:'parseInt 提取开头的整数部分；遇到非数字字符停止。'},
+{diff:'mid',q:'运行以下代码，console.log(b) 输出？',code:`const a = [1, 2]
+const b = [...a, 3]
+console.log(b)`,options:['[1, 2, 3]','[...1, 2, 3]','[1, 2]','报错'],ans:0,
+story:'...a 是<strong>拆包快递员</strong>：把数组 a 里的东西逐个掏出来铺平。[...a, 3] 就是把 1、2 掏出来，再在末尾补上 3，组成新数组 [1,2,3]。',
+steps:['...a 展开成 1, 2','再追加元素 3','b = [1,2,3]'],
+key:'展开运算符 ... 把数组元素铺开；常用于拼接数组。'},
+{diff:'easy',q:'console.log("hello".includes("ell")) 输出？',code:`console.log("hello".includes("ell"))`,options:['true','false','undefined','报错'],ans:0,
+story:'includes 是<strong>安检员</strong>：检查字符串里藏没藏着指定的片段。"hello" 里面 h-e-l-l-o，确实含着 "ell"，安检员点头：true。',
+steps:['检查 "hello" 是否包含 "ell"','包含','返回 true'],
+key:'includes() 返回布尔值，表示是否包含子串。'},
+{diff:'hard',q:'运行以下代码，console.log(fns[1]()) 输出？',code:`const fns = [1, 2, 3].map(n => () => n * 2)
+console.log(fns[1]())`,options:['2','4','1','报错'],ans:1,
+story:'map 像<strong>车间流水线</strong>：对每个 n 生产一个"乘 2 的小机器"。fns[1] 是拿着 n=2 图纸造出来的机器，按下它（调用）就吐出 2×2=4。每个机器都记着自己当时的 n。',
+steps:['map 为每个元素造一个函数','fns[1] 对应 n=2 的机器','调用它：2×2=4'],
+key:'箭头函数闭包记住了创建时的变量值；fns[0]()=2、fns[2]()=6。'}
+],
+java:[
+{diff:'easy',q:'运行下列 Java 程序，输出结果是？',code:`public class Main {
+  public static void main(String[] args) {
+    System.out.println("Java 你好");
+  }
+}`,options:['Java 你好','报错','无输出','main'],ans:0,
+story:'程序是一个<strong>有严格入场流程的剧场</strong>：观众（JVM）从唯一的入口 main 走进剧场，第一件事就是执行剧场里的第一句台词 System.out.println——把 "Java 你好" 喊给控制台听。println 喊完还会自动换行，方便下一句台词接着念。',
+steps:['main 是程序入口','println 输出字符串并换行','屏幕显示“Java 你好”'],
+key:'Java 程序从 main 方法开始执行；System.out.println 输出并换行。'},
+{diff:'easy',q:'int x = 5 / 2; 执行后 x 的值是？',code:`int x = 5 / 2;
+System.out.println(x);`,options:['2.5','2','3','报错'],ans:1,
+story:'int 是<strong>只收整数的口袋</strong>：5 除以 2 明明算出 2.5，可口袋放不下小数点，只能“咔嚓”一刀切掉小数部分，收下 2。注意是直接截断，不是四舍五入——2.9 也会被截成 2。',
+steps:['两个 int 相除结果还是 int','5 / 2 = 2.5，截断为 2','x = 2'],
+key:'int 除法直接截断小数部分；要得到小数结果需让至少一边是 double。'},
+{diff:'easy',q:'System.out.println("结果:" + 3 + 2) 输出？',code:`System.out.println("结果:" + 3 + 2);`,options:['结果:5','结果:32','报错','结果: 5'],ans:1,
+story:'+ 号在 Java 里遇到字符串就<strong>集体叛变成胶水工</strong>：从左往右干活，先看到 "结果:" 是字符串，于是把 3 粘上去变成 "结果:3"；接着又看到字符串了，再把 2 粘上去——变成 "结果:32"。数字想靠 + 做加法？得先给它们加括号：("结果:" + (3 + 2))。',
+steps:['+ 从左边开始，有字符串就拼接','"结果:" + 3 → "结果:3"','"结果:3" + 2 → "结果:32"'],
+key:'字符串 + 任何值都是拼接；要让数字先算加法请加括号。'},
+{diff:'easy',q:'下列代码输出什么？',code:`boolean ok = true;
+System.out.println(!ok);`,options:['true','false','1','报错'],ans:1,
+story:'! 是<strong>反转开关</strong>：ok 开关本来是开着的（true），! 轻轻一拨，就变成了关着的（false）。真变假，假变真，一秒变脸。',
+steps:['ok 是 true','!ok 取反为 false','输出 false'],
+key:'! 是逻辑非运算，true 变 false，false 变 true。'},
+{diff:'mid',q:'运行下列代码，输出结果是？',code:`int score = 75;
+if (score >= 90) {
+  System.out.println("A");
+} else if (score >= 60) {
+  System.out.println("B");
+} else {
+  System.out.println("C");
+}`,options:['A','B','C','无输出'],ans:1,
+story:'这是一场<strong>层层设卡的安检</strong>：75 分先过第一道卡“90 分以上？”被拦下；再过第二道卡“60 分以上？”通过！盖章 B。Java 的 if-else if 从上往下逐卡检查，命中一张卡就放行，后面的卡直接免检。',
+steps:['75 >= 90 不成立','75 >= 60 成立','输出 B，else 跳过'],
+key:'if/else if 从上往下匹配第一个成立的条件，命中后其余不再判断。'},
+{diff:'mid',q:'下列循环结束后 sum 的值是？',code:`int sum = 0;
+for (int i = 1; i <= 4; i++) {
+  sum += i;
+}
+System.out.println(sum);`,options:['4','8','10','16'],ans:2,
+story:'for 循环像一个<strong>精确的计数器机器人</strong>：从 i = 1 开始，每完成一圈给 i 加 1，直到 i = 4 为止（i = 5 时条件不成立）。sum 每圈收下 i：1+2+3+4=10。机器人共跑 4 圈，收集箱里有 10。',
+steps:['循环 i 取 1、2、3、4','sum 累加：1→3→6→10','sum = 10'],
+key:'for 循环三要素：初始化、条件、步进；sum += i 累加。'},
+{diff:'mid',q:'int[] a = {1, 2, 3}; 执行后 a.length 的值是？',code:`int[] a = {1, 2, 3};
+System.out.println(a.length);`,options:['2','3','4','报错'],ans:1,
+story:'数组是一条<strong>固定长度的货架</strong>：装进去 3 件货，货架长度就是 3，而且 Java 的数组一旦建好长度就不能变。length 是货架自带的“长度标签”，直接读出 3。注意它没有括号——因为 length 是属性不是方法。',
+steps:['数组 a 有 3 个元素','length 是属性，直接读取','结果为 3'],
+key:'数组的 length 是属性不加括号；String 的 length() 是方法要加括号。'},
+{diff:'mid',q:'运行下列代码，输出什么？',code:`int[] nums = {5, 10, 15};
+int total = 0;
+for (int n : nums) {
+  total += n;
+}
+System.out.println(total);`,options:['15','20','30','35'],ans:2,
+story:'增强 for 是一条<strong>自动取货传送带</strong>：每次自动从货架 nums 上取下一件货放到 n 手上，不用你操心下标。三件货 5、10、15 依次被放进 total 收集箱：5→15→30。',
+steps:['n 依次取 5、10、15','total 累加：5→15→30','输出 30'],
+key:'增强 for（for-each）自动遍历数组每个元素，无需管理下标。'},
+{diff:'hard',q:'运行下列代码，输出结果是？',code:`int x = 10;
+{
+  int x = 5;
+  System.out.println(x);
+}
+System.out.println(x);`,options:['5 和 5','10 和 10','5 和 10','报错'],ans:2,
+story:'大括号划出<strong>两间独立的房间</strong>：里屋 { } 里声明了新的 x = 5，这个 x 只在里屋有效，就像里屋自己的小抽屉；外屋的 x = 10 在走廊上，互不干扰。里屋打印 5，出来后打印外屋的 10。这叫道：同名变量可以生活在不同作用域，各管各家。',
+steps:['外屋 x = 10','里屋重新声明 x = 5，打印 5','离开里屋，打印外屋 x = 10'],
+key:'块级作用域：大括号内的局部变量不影响外部同名变量。'},
+{diff:'hard',q:'double d = 5.0 / 2; 输出结果是？',code:`double d = 5.0 / 2;
+System.out.println(d);`,options:['2','2.5','2.0','报错'],ans:1,
+story:'double 是<strong>收得下小数的钱袋</strong>：5.0 带着小数点，和 2 相除时，Java 会“高攀”把 2 也升级成 2.0 再除，得到 2.5。只要除法里有一个 double，结果就是 double——小数部分保住了。',
+steps:['5.0 是 double，2 被提升为 2.0','5.0 / 2.0 = 2.5','d = 2.5'],
+key:'int 与 double 混合运算时，int 自动提升为 double，结果是 double。'},
+{diff:'mid',q:'运行下列代码，输出结果是？',code:`System.out.println("a" + 1 + 2);`,options:['a12','a3','3a','报错'],ans:0,
+story:'+ 号遇到字符串就改行<strong>胶水工</strong>：从左往右粘，"a"+1 先粘成 "a1"，再 +2 粘成 "a12"。如果想先算 1+2，得给数字加括号："a"+(1+2)。',
+steps:['"a"+1 先拼接成 "a1"','再拼 "a1"+2 → "a12"','输出 a12'],
+key:'字符串拼接从左到右进行；想先做算术要加括号。'},
+{diff:'easy',q:'System.out.println(7 / 2) 输出？',code:`System.out.println(7 / 2);`,options:['3.5','3','4','3.0'],ans:1,
+story:'Java 里两个 int 相除，是<strong>地板除法</strong>：只取整数商，小数部分直接砍掉。7/2 本来是 3.5，整数商就是 3。想要 3.5 就得有一方写成 7.0。',
+steps:['两个 int 相除','只保留整数部分','结果是 3'],
+key:'int/int 结果是 int，小数被截断；有一方是 double 才有小数。'},
+{diff:'easy',q:'int[] a = {1,2,3};，System.out.println(a.length) 输出？',code:`int[] a = {1, 2, 3};
+System.out.println(a.length);`,options:['2','3','4','报错'],ans:1,
+story:'Java 数组的 length 是<strong>数货架格数的计数器</strong>：a 数组摆了 3 格，length 报 3。注意数组的 length 是<strong>属性</strong>，不加括号（和 String 的 length() 方法不一样）。',
+steps:['数组有 3 个元素','length 返回 3','输出 3'],
+key:'数组用属性 length（无括号）；字符串用方法 length()（有括号）。'},
+{diff:'hard',q:'运行下列代码，输出结果是？',code:`int x = 1;
+{
+  int x = 2;
+}
+System.out.println(x);`,options:['1','2','报错','0'],ans:0,
+story:'里屋 { } 里声明的 int x = 2 是<strong>里屋专属的抽屉</strong>，外面走廊上的 x = 1 毫发无伤。里屋门一关，专属抽屉销毁，走廊上的 x 还是 1。',
+steps:['外屋 x = 1','里屋声明新 x = 2，不影响外屋','打印外屋 x = 1'],
+key:'块内重新声明的变量是全新变量，与外部同名变量无关。'}
+],
+cpp:[
+{diff:'easy',q:'运行下列代码，输出结果是？',code:`#include <iostream>
+using namespace std;
+int main() {
+  cout << "Hello" << endl;
+  return 0;
+}`,options:['Hello','报错','无输出','Hello（无换行）'],ans:0,
+story:'cout 是一条<strong>传送带</strong>：<< 运算符把 "Hello" 这个包裹放上传送带，一路送到屏幕。endl 是传送带末端的“换行”按钮，送完一件货就按一下，光标跳到下一行。程序以 return 0 向系统报平安。',
+steps:['cout << 把字符串送入输出流','endl 换行','屏幕显示 Hello'],
+key:'cout << 内容 << endl 输出并换行；return 0 表示正常结束。'},
+{diff:'easy',q:'int x = 7 / 2; 执行后 x 的值是？',code:`int x = 7 / 2;
+cout << x;`,options:['3.5','3','4','报错'],ans:1,
+story:'int 和 int 相除，结果是<strong>只认整数的裁判</strong>：7 ÷ 2 明明等于 3.5，可裁判的记分牌没有小数点，直接把 .5 丢掉，记 3。这不是四舍五入——就算是 3.9 也会被砍成 3。',
+steps:['7 / 2 两个 int 相除','结果截断小数部分为 3','x = 3'],
+key:'C++ 中 int 除法直接截断小数；想保留小数要用 double。'},
+{diff:'easy',q:'char c = \'A\'; 关于它说法正确的是？',code:`char c = 'A';
+cout << c;`,options:['存储字符串 "A"','存储单个字符 A','报错','c 是 double 类型'],ans:1,
+story:'char 是<strong>单人包厢</strong>：一次只住一个字符，而且只能用单引号 \'A\' 表示。双引号 "A" 是给字符串（一串字符）用的，想塞进 char 的包厢？门太小，进不去。',
+steps:['char 存单个字符','单引号包一个字符','c = \'A\''],
+key:'char 用单引号包单个字符；双引号是字符串，不能赋给 char。'},
+{diff:'easy',q:'运行下列代码，输出结果是？',code:`bool ok = true;
+cout << ok;`,options:['true','1','0','报错'],ans:1,
+story:'cout 遇到 bool 会<strong>翻译成数字</strong>：true 报到屏幕上是 1，false 是 0。这是 C++ 的祖传习惯——bool 底层就是 0 和 1。想打印出 "true" 字样，得自己写 if 判断。',
+steps:['bool true 底层是 1','cout 输出整数形式','结果是 1'],
+key:'cout 打印 bool 显示为 1（true）/ 0（false）。'},
+{diff:'mid',q:'int r = 7 % 3; 执行后 r 的值是？',code:`int r = 7 % 3;
+cout << r;`,options:['2','1','3','报错'],ans:1,
+story:'% 是<strong>分糖果后数剩下的</strong>：7 颗糖分给 3 个人，每人 2 颗，分了 6 颗，剩 1 颗——这个“剩下的”就是 7 % 3 = 1。取模运算在判断奇偶、循环取整时特别常用。',
+steps:['7 ÷ 3 商 2 余 1','% 返回余数','r = 1'],
+key:'% 是取模（求余）运算符，7 % 3 = 1。'},
+{diff:'mid',q:'下列循环结束后 sum 是？',code:`int sum = 0;
+for (int i = 1; i <= 5; i++) {
+  sum += i;
+}
+cout << sum;`,options:['10','15','20','5'],ans:1,
+story:'循环像<strong>自动转圈的摩天轮</strong>：i 从 1 号座舱出发，转到 5 号座舱停下（6 号不存在）。每个座舱经过时，把编号投进 sum 收集箱：1+2+3+4+5=15。摩天轮转了 5 圈，箱子满 15。',
+steps:['i 取 1 到 5','sum 累加为 15','输出 15'],
+key:'for 循环标准三段式；i++ 每圈自增，条件不成立时退出。'},
+{diff:'mid',q:'运行下列代码，输出结果是？',code:`vector<int> v;
+v.push_back(1);
+v.push_back(2);
+cout << v.size();`,options:['0','1','2','报错'],ans:2,
+story:'vector 是一条<strong>能自动加长的货架</strong>：push_back 就是往货架末尾补货，补一次长一格。补了两次货，size() 这个“计数器”报出 2。比普通数组灵活的是，这条货架想加多长就加多长。',
+steps:['空 vector','push_back 两次，元素为 [1, 2]','size() = 2'],
+key:'vector 可动态增长；push_back 追加，size() 返回元素个数。'},
+{diff:'mid',q:'int i = 5; int a = i++; 执行后 a 的值是？',code:`int i = 5;
+int a = i++;
+cout << a;`,options:['5','6','报错','0'],ans:1,
+story:'i++ 是<strong>先交货，后涨价</strong>：它先把 i 当前的值 5 交给 a，然后才偷偷把自己加到 6。所以 a 拿到的是 5，i 自己变成了 6。反观 ++i 是先涨价后交货，顺序正好相反。',
+steps:['i++ 先返回 i 的原值 5','a 得到 5','然后 i 才变成 6'],
+key:'i++ 先取值再自增；++i 先自增再取值，两者结果不同。'},
+{diff:'hard',q:'运行下列代码，输出结果是？',code:`int x = 10;
+{
+  int x = 5;
+  cout << x << " ";
+}
+cout << x;`,options:['10 10','5 5','5 10','报错'],ans:2,
+story:'大括号是<strong>一道隐形隔断墙</strong>：墙里面重新声明了 x = 5，这个新 x 只在墙内有效——像房间里自己的小储物柜；墙外的 x = 10 在客厅里，不受影响。里面打印 5，出来打印 10。同名变量各居其所，互不打扰。',
+steps:['外层 x = 10','内层大括号里 x = 5，打印 5','离开块，打印外层的 10'],
+key:'C++ 块级作用域：块内声明的变量只在块内有效，可遮蔽外部同名变量。'},
+{diff:'hard',q:'cout << 7 / 2.0; 输出结果是？',code:`cout << 7 / 2.0;`,options:['3','3.5','3.0','报错'],ans:1,
+story:'2.0 带着小数点，就像一位<strong>要求精算的顾客</strong>：遇到它，7 也会被“高攀”成 7.0 再除，结果 3.5 完整保留。只要除号两边有一个是 double，结果就是 double——这就是 C++ 的类型提升规则。',
+steps:['7 / 2.0 中 2.0 是 double','7 提升为 7.0','结果 3.5'],
+key:'int 与 double 混合运算时 int 自动提升为 double，结果保留小数。'},
+{diff:'easy',q:'运行下列代码，输出结果是？',code:`int a[3] = {10, 20, 30};
+cout << a[1];`,options:['10','20','30','报错'],ans:1,
+story:'数组是<strong>一排编号从 0 开始的格子</strong>：a[0] 住 10，a[1] 住 20，a[2] 住 30。a[1] 伸手拿第二个格子，里面是 20。',
+steps:['下标从 0 开始','a[1] 是第二个元素','值为 20'],
+key:'数组下标从 0 开始；a[i] 读取第 i+1 个元素。'},
+{diff:'easy',q:'运行下列代码，输出结果是？',code:`int square(int x) {
+  return x * x;
+}
+cout << square(3);`,options:['3','6','9','报错'],ans:2,
+story:'square 是一台<strong>平方加工机</strong>：3 递进去，x*x 算出 9，通过 return 交出来。cout 接过 9 打印到屏幕上。',
+steps:['调用 square(3)','函数内 3*3=9','return 交出 9'],
+key:'自定义函数用 return 返回计算结果；调用时实参 3 传给形参 x。'},
+{diff:'mid',q:'运行下列代码，输出结果是？',code:`string s = "ab";
+s += "cd";
+cout << s;`,options:['abcd','ab+cd','ab','报错'],ans:0,
+story:'+= 是<strong>在原地加长</strong>：s 原来装 "ab"，s += "cd" 把 "cd" 接在它屁股后面，变成 "abcd"。这和 Java 的字符串不可变不一样——C++ 的 string 可以原地增长。',
+steps:['s = "ab"','s += "cd" 拼接尾部','s = "abcd"'],
+key:'C++ string 支持 += 原地追加；字符串字面量之间不能直接用 + 拼接。'},
+{diff:'hard',q:'运行下列代码，输出结果是？',code:`int a = 5;
+int& r = a;
+r = 10;
+cout << a;`,options:['5','10','报错','0'],ans:1,
+story:'int& r 是 a 的<strong>别名</strong>——同一个盒子贴了两张标签。通过 r = 10 改东西，改的就是盒子本身，不是复印件。所以 a 转头看自己，已经变成 10 了。',
+steps:['r 是 a 的引用（别名）','r = 10 改的是同一块内存','a 也变成 10'],
+key:'引用 & 是同一变量的别名；通过引用修改会影响原变量。'}
+],
+go:[
+{diff:'easy',q:'运行下列代码，输出结果是？',code:`package main
+import "fmt"
+func main() {
+  fmt.Println("Go 你好")
+}`,options:['Go 你好','报错','无输出','main'],ans:0,
+story:'Go 程序像<strong>一支纪律严明的队伍</strong>：package main 是队伍番号，import 是领装备（fmt 是打印工具箱），func main 是出发哨——哨声一响，队伍从 main 开始行动，第一件事就是 fmt.Println 把 "Go 你好" 喊给终端听。',
+steps:['main 函数是程序入口','fmt.Println 打印并换行','输出“Go 你好”'],
+key:'Go 程序从 main 包 main 函数开始；fmt.Println 输出并自动换行。'},
+{diff:'easy',q:'age := 16 中，age 的类型是？',code:`age := 16
+fmt.Println(age)`,options:['string','int','float64','需要手动声明'],ans:1,
+story:':= 是<strong>会读心术的短声明</strong>：你只需说“age 装着 16”，它瞄一眼右边的值，就自动判断这是 int 类型并完成声明。不用你写 var age int = 16 那么啰嗦。但它不是乱猜——类型推断非常准确。',
+steps:[':= 自动推断类型','16 是整数','age 是 int'],
+key:':= 短声明自动推断类型；等价于 var age int = 16。'},
+{diff:'easy',q:'fmt.Println("5" + "5") 输出？',code:`fmt.Println("5" + "5")`,options:['10','55','报错','25'],ans:1,
+story:'Go 里的 + 号是<strong>看菜下碟的厨师</strong>：两边都是字符串时，它做拼接——把 "5" 和 "5" 端在一起，变成 "55"；两边都是数字时才做加法。混着来（字符串+数字）？它会直接掀桌报错，因为 Go 最讨厌类型混乱。',
+steps:['字符串 + 字符串做拼接','"5" + "5" = "55"','输出 55'],
+key:'Go 中字符串用 + 拼接；字符串与数字不能直接用 + 混合，需显式转换。'},
+{diff:'easy',q:'运行下列代码，x 和 y 的值是？',code:`func swap(a, b int) (int, int) {
+  return b, a
+}
+func main() {
+  x, y := swap(1, 2)
+  fmt.Println(x, y)
+}`,options:['x=1 y=2','x=2 y=1','报错','x=2 y=2'],ans:1,
+story:'swap 是一个<strong>左右手交换的魔术师</strong>：接住 (1, 2)，变个戏法，返回 (2, 1)。Go 的特色是函数可以一次吐出两个结果，调用方 x, y := 同时接住——x 接第一个 2，y 接第二个 1。一次交易，两笔收入。',
+steps:['swap(1, 2) 返回 (2, 1)','x 接第一个值 2','y 接第二个值 1'],
+key:'Go 函数支持多返回值；x, y := f() 可一次接住多个返回值。'},
+{diff:'mid',q:'下列循环结束后 sum 是？',code:`sum := 0
+for i := 1; i <= 5; i++ {
+  sum += i
+}
+fmt.Println(sum)`,options:['10','15','21','5'],ans:1,
+story:'Go 只有 for 这一种循环，但它<strong>一专多能</strong>：三段式写法像传送带，i 从 1 运到 5，每站把编号投进 sum 收集箱。1+2+3+4+5=15。想用 while？把三段式中间那部分留着就行。',
+steps:['i 取 1 到 5','sum 累加 1+2+3+4+5','结果 15'],
+key:'Go 的 for 三部分：初始化；条件；步进。条件式写法可当 while 用。'},
+{diff:'mid',q:'运行下列代码，输出结果是？',code:`nums := []int{1, 2, 3}
+for _, n := range nums {
+  fmt.Println(n)
+}`,options:['1 2 3（各一行）','0 1 2','报错','1,2,3 同一行'],ans:0,
+story:'range 是<strong>挨个点名的老师</strong>：它举着花名册，每喊到一个元素就交给 n 同学。下划线 _ 是“这个位置的名字我不记”——range 本来会给索引和值两个东西，我们只要值。三个元素各打印一行，1、2、3。',
+steps:['range 遍历切片每个元素','_ 丢弃索引，n 取到值','打印 1、2、3 各一行'],
+key:'for _, n := range slice 遍历取值；下划线 _ 表示忽略该返回值。'},
+{diff:'mid',q:'下列代码输出什么？',code:`nums := []int{1, 2}
+nums = append(nums, 3)
+fmt.Println(len(nums))`,options:['2','3','报错','1'],ans:1,
+story:'append 是<strong>往货架补货的叉车</strong>：nums 本来有 2 件货，叉车补上 3 号货，货架变成 [1,2,3]。注意 Go 的规矩：append 会返回一条（可能全新的）货架，必须重新接住——所以写法是 nums = append(nums, 3)，接不住就会丢货。',
+steps:['nums 初始 [1, 2]','append 返回新切片 [1, 2, 3] 并赋回 nums','len = 3'],
+key:'append 返回新切片，必须用变量接住；len() 求切片长度。'},
+{diff:'mid',q:'运行下列代码，输出结果是？',code:`score := 85
+if score >= 90 {
+  fmt.Println("优秀")
+} else if score >= 60 {
+  fmt.Println("及格")
+} else {
+  fmt.Println("不及格")
+}`,options:['优秀','及格','不及格','报错'],ans:1,
+story:'Go 的 if 是一道<strong>不装括号的安检门</strong>：条件直接写在 if 后面，不用圆括号，但大括号一个都不能少。85 分过不了“90 分”第一道门，但能过“60 分”第二道门，盖章“及格”，后面的门直接免检。',
+steps:['85 >= 90 不成立','85 >= 60 成立','输出“及格”'],
+key:'Go 的 if 不需要括号但必须有大括号；else if 用于多分支判断。'},
+{diff:'hard',q:'下面代码能否通过编译？',code:`package main
+func main() {
+  x := 10
+  fmt.Println(x)
+}` ,options:['能编译并运行','报错：x 未使用','报错：语法错误','能编译但运行崩溃'],ans:0,
+story:'这段代码<strong>规规矩矩</strong>：x := 10 声明后又用 fmt.Println 打印了它，物尽其用。Go 编译器有个洁癖——声明了却不用的变量会被点名批评并拒绝编译。这里 x 被使用了，编译器很满意，顺利通过。',
+steps:['x 声明并赋值 10','x 被 Println 使用','编译通过，输出 10'],
+key:'Go 编译期检查：已声明变量必须被使用，否则编译失败；导入的包同理。'},
+{diff:'hard',q:'运行下列代码，输出结果是？',code:`x := 5
+func main() {
+  y := 10
+  fmt.Println(x + y)
+}` ,options:['15','报错','10','5'],ans:1,
+story:'这段代码会<strong>被编译器拦下</strong>：函数外面（包级别）的 x := 5 是短声明，而 Go 规定短声明只能在函数内部使用——包级别必须用 var。代码把 x 声明在了“不允许短声明的地方”，编译器直接亮红牌。',
+steps:['x := 5 写在函数外','包级别不允许使用 := 短声明','编译报错'],
+key:'短声明 := 只能在函数内部使用；包级变量必须用 var 声明。'},
+{diff:'mid',q:'x := 3.14;，fmt.Printf("%T", x) 输出？',code:`x := 3.14
+fmt.Printf("%T", x)`,options:['int','float64','string','报错'],ans:1,
+story:'%T 是 Go 的<strong>验货章</strong>：打印值之前先看看它是什么类型。3.14 带着小数点，Go 里的小数默认全部是 float64 这个类型，验货章盖出 float64。',
+steps:['3.14 是小数','Go 小数默认类型是 float64','%T 打印出 float64'],
+key:'Go 浮点字面量默认是 float64；%T 打印类型。'},
+{diff:'mid',q:'运行下列代码，输出结果是？',code:`m := map[string]int{"a": 1, "b": 2}
+fmt.Println(m["b"])`,options:['1','2','b','报错'],ans:1,
+story:'map 是一本<strong>按键翻页的通讯录</strong>：写着 "b" 钥匙，就翻到 "b" 那一页，取出对应的 2。键不存在时取出该类型的零值（int 就是 0），不报错——这是 Go 的贴心设计。',
+steps:['键 "b" 对应值 2','m["b"] 取出 2','输出 2'],
+key:'map 用 m[key] 取值；键不存在返回零值，用 _, ok := m[k] 判断是否存在。'}
+]
+};
+</script>
+
+<!-- ===== 应用逻辑 ===== -->
+<script>
+/* ================= 工具 ================= */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const STORE='codecamp_v1';
+let PROG=(()=>{try{return JSON.parse(localStorage.getItem(STORE))||{}}catch(e){return{}}})();
+function save(){try{localStorage.setItem(STORE,JSON.stringify(PROG))}catch(e){}}
+function lp(id){return PROG[id]||(PROG[id]={done:[],quiz:{}})}
+const TOTAL_LESSONS=Object.values(LESSONS).reduce((a,l)=>a+l.length,0);
+const TOTAL_QUIZ=Object.values(QUIZ).reduce((a,q)=>a+q.length,0);
+
+let toastTimer;
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2200);}
+
+/* ================= 代码高亮 ================= */
+const KW={
+  python:['def','return','if','elif','else','for','in','while','import','class','and','or','not','global','None','True','False'],
+  js:['const','let','var','if','else','for','function','return','true','false','new','typeof','while','switch','case','break'],
+  java:['public','class','static','void','int','double','boolean','if','else','for','return','new','true','false','String'],
+  cpp:['using','namespace','int','double','char','bool','vector','if','else','for','return','true','false','endl','include','std'],
+  go:['package','import','func','var','int','string','float64','bool','if','else','for','return','true','false','range','defer','type','struct']
+};
+const FN={
+  python:['print','len','type','range','append','sort','replace'],
+  js:['console','log'],
+  java:['System'],
+  cpp:['cout'],
+  go:['fmt','append','len']
+};
+function highlight(code,lang){
+  let re;
+  if(lang==='python') re=/(#.*$)|(".*?"|'.*?')|(\b\d+(?:\.\d+)?\b)|([A-Za-z_]\w*)/gm;
+  else if(lang==='cpp') re=/(\/\/.*$)|(#[A-Za-z]\w*)|(".*?"|'.*?')|(\b\d+(?:\.\d+)?\b)|([A-Za-z_]\w*)/gm;
+  else re=/(\/\/.*$)|(".*?"|'.*?'|`.*?`)|(\b\d+(?:\.\d+)?\b)|([A-Za-z_]\w*)/gm;
+  const K=KW[lang]||[],F=FN[lang]||[];let out='',last=0,m;
+  while((m=re.exec(code))){
+    out+=esc(code.slice(last,m.index));
+    if(m[1])out+='<span class="tok-cm">'+esc(m[1])+'</span>';
+    else if(m[2]&&(m[2][0]==='#'))out+='<span class="tok-kw">'+esc(m[2])+'</span>';
+    else if(m[2])out+='<span class="tok-str">'+esc(m[2])+'</span>';
+    else if(m[3])out+='<span class="tok-num">'+esc(m[3])+'</span>';
+    else{const w=m[4];if(K.includes(w))out+='<span class="tok-kw">'+w+'</span>';else if(F.includes(w))out+='<span class="tok-fn">'+w+'</span>';else out+=esc(w);}
+    last=m.index+m[0].length;
+  }
+  out+=esc(code.slice(last));
+  return out;
+}
+
+/* ================= 导航 ================= */
+function renderNav(langId){
+  $('#navLangs').innerHTML=LANG_ORDER.map(id=>{
+    const m=LANG_META[id];
+    return '<a href="#/lang/'+id+'"'+(id===langId?' class="active"':'')+'><span class="dot" style="background:'+m.color+'"></span>'+m.name+'</a>';
+  }).join('');
+  const done=Object.keys(LESSONS).reduce((a,id)=>a+(PROG[id]?PROG[id].done.length:0),0);
+  const pct=TOTAL_LESSONS?Math.round(done/TOTAL_LESSONS*100):0;
+  $('#navPct').textContent=pct+'%';$('#navBar').style.width=pct+'%';
+}
+
+/* ================= 视图路由 ================= */
+function parseHash(){
+  const h=(location.hash||'#/').replace(/^#\/?/,'');
+  const seg=h.split('/').filter(Boolean);
+  if(seg[0]==='lang'&&seg[1])return{view:'lang',lang:seg[1]};
+  if(seg[0]==='lesson'&&seg[1]&&seg[2]!=null)return{view:'lesson',lang:seg[1],n:+seg[2]};
+  if(seg[0]==='quiz'&&seg[1])return{view:'quiz',lang:seg[1]};
+  if(seg[0]==='practice'&&seg[1])return{view:'practice',lang:seg[1]};
+  return{view:'home'};
+}
+let heroTimer=null;
+function router(){
+  const r=parseHash();
+  ['home','lang','lesson','quiz','practice'].forEach(v=>$('#view-'+v).classList.remove('active'));
+  if(heroTimer){clearInterval(heroTimer);heroTimer=null;}
+  if(r.view==='home'){
+    $('#view-home').classList.add('active');renderNav(null);renderHome();
+  }else if(r.view==='lang'){
+    if(!LANG_META[r.lang]){location.hash='#/';return;}
+    $('#view-lang').classList.add('active');renderNav(r.lang);renderLang(r.lang);
+  }else if(r.view==='lesson'){
+    if(!LANG_META[r.lang]||!LESSONS[r.lang][r.n]){location.hash='#/lang/'+r.lang;return;}
+    $('#view-lesson').classList.add('active');renderNav(r.lang);renderLesson(r.lang,r.n);
+  }else if(r.view==='quiz'){
+    if(!LANG_META[r.lang]){location.hash='#/';return;}
+    $('#view-quiz').classList.add('active');renderNav(r.lang);openQuiz(r.lang);
+  }else if(r.view==='practice'){
+    if(!LANG_META[r.lang]){location.hash='#/';return;}
+    $('#view-practice').classList.add('active');renderNav(r.lang);renderPractice(r.lang);
+  }
+  window.scrollTo({top:0});
+}
+window.addEventListener('hashchange',router);
+
+/* ================= 首页 ================= */
+function renderHome(){
+  const done=Object.keys(LESSONS).reduce((a,id)=>a+(PROG[id]?PROG[id].done.length:0),0);
+  const answered=Object.keys(QUIZ).reduce((a,id)=>{const p=PROG[id];return a+(p&&p.quiz?Object.keys(p.quiz).length:0)},0);
+  const correct=Object.keys(QUIZ).reduce((a,id)=>{const p=PROG[id];if(!p||!p.quiz)return a;return a+Object.values(p.quiz).filter(v=>v===true).length},0);
+  $('#stLessons').textContent=TOTAL_LESSONS;
+  $('#stQuizzes').textContent=TOTAL_QUIZ;
+  $('#stPrac').textContent=Object.values(PRACTICE).reduce((a,l)=>a+l.length,0);
+  $('#langGrid').innerHTML=LANG_ORDER.map(id=>{
+    const m=LANG_META[id];const p=lp(id);
+    const dl=p.done.length,qt=QUIZ[id].length,qn=Object.keys(p.quiz).length,qc=Object.values(p.quiz).filter(v=>v===true).length;
+    const pct=Math.round(dl/LESSONS[id].length*100);
+    const acc=qn?Math.round(qc/qn*100):0;
+    return '<div class="lang-card" style="--lc:'+m.color+'" onclick="location.hash=\'#/lang/'+id+'\'">'+
+      '<div class="lc-head"><div class="lc-badge">'+esc(m.icon)+'</div><div><h3>'+m.name+'</h3><div class="lc-tag">'+esc(m.tag)+'</div></div></div>'+
+      '<p>'+esc(m.desc)+'</p>'+
+      '<div class="lc-foot"><div class="meta"><span>'+LESSONS[id].length+' 节课</span><span>'+qt+' 道题</span></div>'+
+      '<span class="lc-go">开始学习 →</span></div>'+
+      '<div style="display:flex;align-items:center;gap:12px;margin-top:-4px">'+
+        '<div class="ring" style="--p:'+pct+';--c:'+m.color+'"><svg viewBox="0 0 36 36"><circle class="track" cx="18" cy="18" r="16"/><circle class="bar" cx="18" cy="18" r="16"/></svg><b>'+pct+'%</b></div>'+
+        '<div class="small muted">已完成 '+dl+'/'+LESSONS[id].length+' 课 · 习题正确率 '+acc+'%</div>'+
+      '</div></div>';
+  }).join('');
+  if(!$('#heroPlayer').dataset.ready){
+    $('#heroPlayer').dataset.ready='1';
+    renderDemoPlayer($('#heroPlayer'),LESSONS.python[1].demo,'python',{autoplay:true,loop:true});
+  }
+}
+
+/* ================= 演示播放器 ================= */
+const playerState={};
+function renderDemoPlayer(host,demo,lang,opts){
+  opts=opts||{};
+  host.innerHTML=
+    '<div class="demo-player">'+
+      '<div class="code-window"><div class="cw-bar"><span class="cwd"></span><span class="cwd"></span><span class="cwd"></span><span class="cw-file">'+esc(demo.file)+'</span></div>'+
+      '<div class="cw-body"><div class="cw-lines">'+demo.code.split('\n').map((ln,i)=>'<div class="cw-line" data-l="'+i+'"><span class="ln">'+(i+1)+'</span><span class="lc">'+highlight(ln,lang)+'</span></div>').join('')+'</div></div></div>'+
+      '<div class="demo-stage">'+
+        '<div class="demo-console"><div class="lbl"><i></i>控制台</div><div class="out"></div></div>'+
+        '<div class="demo-vars"><div class="lbl">变量</div><div class="var-list"><div class="var-empty">还没有变量</div></div></div>'+
+      '</div>'+
+      '<div class="demo-note"></div>'+
+      '<div class="demo-controls">'+
+        '<button class="ctrl-btn" data-a="replay" title="重播"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg></button>'+
+        '<button class="ctrl-btn" data-a="prev" title="上一步"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 6h2v12H7zM19 6l-9 6 9 6z"/></svg></button>'+
+        '<button class="ctrl-btn main" data-a="play" title="播放/暂停"><svg class="ic-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg><svg class="ic-pause" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg></button>'+
+        '<button class="ctrl-btn" data-a="next" title="下一步"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15 6h2v12h-2zM5 6l9 6-9 6z"/></svg></button>'+
+        '<div class="demo-progress" title="拖动跳转"><i></i></div>'+
+        '<span class="demo-stepinfo">1 / '+demo.steps.length+'</span>'+
+        '<div class="speed-group"><button data-s="0.5">0.5x</button><button data-s="1" class="active">1x</button><button data-s="1.5">1.5x</button><button data-s="2">2x</button></div>'+
+      '</div>'+
+    '</div>';
+  const st={demo,idx:0,playing:false,speed:1,timer:null,opts};
+  playerState[host]=st;
+  const lines=host.querySelectorAll('.cw-line');
+  const outEl=host.querySelector('.out'),varEl=host.querySelector('.var-list'),noteEl=host.querySelector('.demo-note');
+  const stepEl=host.querySelector('.demo-stepinfo'),barEl=host.querySelector('.demo-progress i'),barWrap=host.querySelector('.demo-progress');
+  const playBtn=host.querySelector('[data-a="play"]'),icPlay=host.querySelector('.ic-play'),icPause=host.querySelector('.ic-pause');
+  function renderVars(vars){
+    const ks=Object.keys(vars||{});
+    if(!ks.length){varEl.innerHTML='<div class="var-empty">还没有变量</div>';return;}
+    varEl.innerHTML=ks.map(k=>'<div class="var-row"><span class="vn">'+esc(k)+'</span><span class="vv">'+esc(vars[k])+'</span></div>').join('');
+  }
+  function applyStep(){
+    const s=demo.steps[st.idx];
+    lines.forEach((l,i)=>{l.classList.toggle('done',i<st.idx);l.classList.toggle('run',i===st.idx);});
+    if(s.out!==undefined)outEl.innerHTML+='<div class="out">'+esc(s.out)+'</div>';
+    renderVars(s.vars);
+    noteEl.innerHTML='<span class="ntag">讲解</span>'+s.note;
+    stepEl.textContent=(st.idx+1)+' / '+demo.steps.length;
+    barEl.style.width=((st.idx+1)/demo.steps.length*100)+'%';
+    if(st.idx===demo.steps.length-1){st.playing=false;stopTimer();updatePlayIcon();}
+  }
+  function updatePlayIcon(){icPlay.style.display=st.playing?'none':'';icPause.style.display=st.playing?'':'none';}
+  function stopTimer(){if(st.timer){clearInterval(st.timer);st.timer=null;}}
+  function startTimer(){stopTimer();st.timer=setInterval(()=>{if(st.idx<demo.steps.length-1){st.idx++;applyStep();}else{stopTimer();st.playing=false;updatePlayIcon();if(opts.loop){setTimeout(()=>{if(st.playing!==undefined){st.idx=0;outEl.innerHTML='';st.playing=true;updatePlayIcon();startTimer();applyStep();}},1400);}}},1500/st.speed);}
+  function togglePlay(){if(st.idx>=demo.steps.length-1){st.idx=0;outEl.innerHTML='';applyStep();}st.playing=!st.playing;updatePlayIcon();st.playing?startTimer():stopTimer();}
+  host.querySelectorAll('[data-a]').forEach(b=>b.addEventListener('click',e=>{
+    const a=e.currentTarget.dataset.a;
+    if(a==='play')togglePlay();
+    else if(a==='replay'){stopTimer();st.idx=0;outEl.innerHTML='';st.playing=false;updatePlayIcon();applyStep();}
+    else if(a==='prev'){stopTimer();st.playing=false;updatePlayIcon();if(st.idx>0)st.idx--;applyStep();}
+    else if(a==='next'){stopTimer();st.playing=false;updatePlayIcon();if(st.idx<demo.steps.length-1)st.idx++;applyStep();}
+  }));
+  host.querySelectorAll('[data-s]').forEach(b=>b.addEventListener('click',e=>{
+    host.querySelectorAll('[data-s]').forEach(x=>x.classList.remove('active'));b.classList.add('active');
+    st.speed=+b.dataset.s;
+    if(st.playing){stopTimer();startTimer();}
+  }));
+  barWrap.addEventListener('click',e=>{
+    const r=barWrap.getBoundingClientRect();const ratio=(e.clientX-r.left)/r.width;
+    stopTimer();st.playing=false;updatePlayIcon();
+    st.idx=Math.min(demo.steps.length-1,Math.max(0,Math.floor(ratio*demo.steps.length)));
+    applyStep();
+  });
+  applyStep();
+  if(opts.autoplay){togglePlay();}
+}
+
+/* ================= 语言页 ================= */
+function renderLang(id){
+  const m=LANG_META[id],p=lp(id);
+  const dl=p.done.length,qt=QUIZ[id].length,qn=Object.keys(p.quiz).length,qc=Object.values(p.quiz).filter(v=>v===true).length;
+  const pct=Math.round(dl/LESSONS[id].length*100);
+  const acc=qn?Math.round(qc/qn*100):0;
+  const kh=Object.keys(LESSONS[id]).length?Object.values(LESSONS[id]).flatMap(l=>l.points.map(pt=>pt.t)).slice(0,6):[];
+  $('#view-lang').innerHTML=
+    '<div class="lang-hero" style="--lc:'+m.color+'">'+
+      '<div class="lh-row"><div class="lh-badge">'+esc(m.icon)+'</div><div><h2>'+m.name+'</h2><div class="lh-tag">'+esc(m.tag)+'</div></div></div>'+
+      '<p class="lh-desc">'+esc(m.desc)+'</p>'+
+      '<div class="lh-meta">'+m.uses.map(u=>'<span class="chip">'+esc(u)+'</span>').join('')+'</div>'+
+    '</div>'+
+    '<div class="lang-layout"><div>'+
+      '<div class="section-title">学习路径</div><div class="section-sub">'+dl+'/'+LESSONS[id].length+' 节已完成</div>'+
+      '<div class="lesson-list">'+LESSONS[id].map((l,i)=>
+        '<div class="lesson-item'+(p.done.includes(l.id)?' done':'')+'" onclick="location.hash=\'#/lesson/'+id+'/'+i+'\'">'+
+        '<div class="li-num">'+(p.done.includes(l.id)?'✓':String(i+1).padStart(2,'0'))+'</div>'+
+        '<div class="li-body"><h4>'+esc(l.title)+'</h4><div class="li-meta"><span>'+esc(l.dur)+'</span><span>'+l.points.length+' 个知识点</span><span>含代码演示</span></div></div>'+
+        '<span class="li-arrow">›</span></div>').join('')+'</div>'+
+    '</div><div class="side-panel">'+
+      '<div class="quiz-entry" style="--lc:'+m.color+'">'+
+        '<h4>'+m.name+' 习题挑战</h4><p>'+qt+' 道题覆盖全部知识点，做完即看活泼风格解析。</p>'+
+        '<div class="qe-stats"><div><b>'+qt+'</b>道题</div><div><b>'+qn+'</b>已答</div><div><b>'+acc+'%</b>正确率</div></div>'+
+        '<button class="btn btn-accent" onclick="location.hash=\'#/quiz/'+id+'\'">开始挑战 →</button>'+
+      '</div>'+
+      '<div class="quiz-entry" style="--lc:'+m.color+';margin-top:14px;background:linear-gradient(135deg,#0E2A47,#18365A)">'+
+        '<h4 style="color:#fff">动手写代码</h4><p style="color:#B9C9DE">'+(PRACTICE[id]?PRACTICE[id].length+' 道实战练习，浏览器里真实运行你的代码并自动判题。':'该语言的在线练习即将上线。')+'</p>'+
+        (PRACTICE[id]?'<div class="qe-stats"><div style="color:#fff"><b>'+PRACTICE[id].length+'</b>道练习</div><div style="color:#B9C9DE"><b>'+Object.keys(p.practice||{}).length+'</b>已通过</div><div style="color:#FFB454">真运行</div></div>'+
+        '<button class="btn btn-accent" onclick="location.hash=\'#/practice/'+id+'\'">开始动手 →</button>':'')+
+      '</div>'+
+      '<div class="panel"><h4><span class="dot"></span>本语言核心知识点</h4><div class="panel-list">'+kh.map(k=>'<div class="pl-item"><b>·</b>'+esc(k)+'</div>').join('')+'</div></div>'+
+    '</div></div>';
+}
+
+/* ================= 课程页 ================= */
+function renderLesson(lang,n){
+  const m=LANG_META[lang],l=LESSONS[lang][n],p=lp(lang);
+  if(!p.done.includes(l.id)){p.done.push(l.id);save();}
+  const prev=n>0?'<a class="btn btn-ghost" href="#/lesson/'+lang+'/'+(n-1)+'">← 上一节</a>':'';
+  const next=n<LESSONS[lang].length-1?'<a class="btn btn-accent" href="#/lesson/'+lang+'/'+(n+1)+'">下一节 →</a>':'<a class="btn btn-accent" href="#/quiz/'+lang+'">去刷题 →</a>';
+  $('#view-lesson').innerHTML=
+    '<div class="lesson-head"><a class="back" href="#/lang/'+lang+'">← 返回 '+m.name+'</a><div class="lesson-meta"><span class="tag" style="background:color-mix(in srgb,'+m.color+' 12%,white);color:'+m.color+'">'+m.name+'</span><span>第 '+(n+1)+' / '+LESSONS[lang].length+' 节</span></div></div>'+
+    '<h2 class="lesson-title">'+esc(l.title)+'</h2>'+
+    '<div class="lesson-meta"><span>'+esc(l.dur)+'</span><span>'+l.points.length+' 个知识点</span><span>含逐行代码演示</span></div>'+
+    l.points.map((pt,i)=>'<div class="kp-card"><h3><span class="kp-n">'+(i+1)+'</span>'+esc(pt.t)+'</h3><p>'+pt.d+'</p></div>').join('')+
+    '<div class="section-title">代码运行演示</div><div class="section-sub">点击播放，逐行观看代码执行过程</div>'+
+    '<div class="demo-wrap" id="lessonPlayer"></div>'+
+    (l.tip?'<div class="lesson-tip"><b>小贴士：</b>'+esc(l.tip)+'</div>':'')+
+    '<div class="lesson-nav">'+prev+'<a class="btn btn-ghost" href="#/lang/'+lang+'">课程目录</a>'+next+'</div>';
+  renderDemoPlayer($('#lessonPlayer'),l.demo,lang,{});
+}
+
+/* ================= 习题页 ================= */
+const quizState={lang:'python',idx:0,correct:0,answered:false,hist:[]};
+function openQuiz(lang){
+  quizState.lang=lang;quizState.idx=0;quizState.correct=0;quizState.answered=false;quizState.hist=[];
+  renderQuiz();
+}
+function renderQuiz(){
+  const lang=quizState.lang,m=LANG_META[lang],list=QUIZ[lang];
+  const head='<div class="quiz-head"><a class="back" href="#/lang/'+lang+'">← 返回</a><span class="quiz-title" style="color:'+m.color+'">'+m.name+' 习题</span>'+
+    '<div class="quiz-progress"><span>第 '+(quizState.idx+1)+' / '+list.length+' 题</span><div class="qbar"><i style="width:'+(quizState.idx/list.length*100)+'%"></i></div></div>'+
+    '<span class="quiz-score">答对 '+quizState.correct+' 题</span></div>';
+  if(quizState.idx>=list.length){renderResult(head);return;}
+  const q=list[quizState.idx];
+  $('#view-quiz').innerHTML=head+
+    '<div class="quiz-card"><div class="q-meta"><span class="q-num">Q'+(quizState.idx+1)+'</span><span class="diff '+q.diff+'">'+({easy:'入门',mid:'进阶',hard:'挑战'}[q.diff])+'</span></div>'+
+    '<div class="q-text">'+esc(q.q)+'</div>'+
+    (q.code?'<div class="q-code"><div class="qc-bar">'+esc(m.name)+'</div><pre>'+highlight(q.code,lang)+'</pre></div>':'')+
+    '<div class="options">'+q.options.map((o,i)=>'<button class="option" data-i="'+i+'" '+(quizState.answered?'disabled':'')+'><span class="opt-key">'+String.fromCharCode(65+i)+'</span><span>'+esc(o)+'</span></button>').join('')+'</div>'+
+    '<div class="q-feedback"></div>'+
+    '<div class="qf-next"></div></div>';
+  if(quizState.answered)return;
+  $('#view-quiz').querySelectorAll('.option').forEach(btn=>btn.addEventListener('click',()=>answerQuiz(+btn.dataset.i)));
+}
+function answerQuiz(i){
+  const lang=quizState.lang,q=QUIZ[lang][quizState.idx];
+  quizState.answered=true;
+  const ok=i===q.ans;
+  quizState.hist.push(ok);if(ok)quizState.correct++;
+  lp(lang).quiz['q'+quizState.idx]=ok;save();
+  const opts=$('#view-quiz').querySelectorAll('.option');
+  opts.forEach((b,bi)=>{
+    b.disabled=true;
+    if(bi===q.ans)b.classList.add('correct');
+    else if(bi===i)b.classList.add('wrong');
+    else b.classList.add('plain');
+  });
+  const fb=$('#view-quiz').querySelector('.q-feedback');
+  fb.classList.add('show');
+  fb.innerHTML='<div class="qf-head '+(ok?'correct-bg':'wrong-bg')+'">'+(ok?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>回答正确！':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/></svg>答错了，看看解析</div>')+
+    '<div class="qf-body">'+
+    '<div class="qf-story">'+q.story+'</div>'+
+    '<div class="qf-steps">'+q.steps.map(s=>'<div class="qf-step"><span class="sdot"></span><span>'+esc(s)+'</span></div>').join('')+'</div>'+
+    '<div class="qf-key"><b>考点：</b>'+esc(q.key)+'</div>'+
+    (q.tip?'<div class="qf-key" style="border-left-color:var(--err)"><b>避坑：</b>'+esc(q.tip)+'</div>':'')+
+    '<div class="qf-answer">正确答案是 <span class="badge">'+String.fromCharCode(65+q.ans)+'. '+esc(q.options[q.ans])+'</span></div>'+
+    '</div>';
+  const nextBox=$('#view-quiz').querySelector('.qf-next');
+  const isLast=quizState.idx>=QUIZ[lang].length-1;
+  nextBox.innerHTML=isLast?'<button class="btn btn-accent" onclick="nextQuiz()">查看成绩</button>':'<button class="btn btn-accent" onclick="nextQuiz()">下一题 →</button>';
+}
+function nextQuiz(){quizState.idx++;quizState.answered=false;renderQuiz();}
+function renderResult(head){
+  const lang=quizState.lang,m=LANG_META[lang],total=QUIZ[lang].length;
+  const pct=Math.round(quizState.correct/total*100);
+  const msg=pct>=80?'太强了！大部分知识点你已经拿下了，继续保持。':pct>=60?'不错！基础已经打牢，把错题的解析再看一遍会更稳。':'别灰心，错题解析里藏着进步的关键，再来一轮试试。';
+  $('#view-quiz').innerHTML=head+
+    '<div class="quiz-result show"><div class="qr-ring"><svg viewBox="0 0 120 120"><defs><linearGradient id="qrGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="'+m.color+'"/><stop offset="100%" stop-color="'+m.color+'cc"/></linearGradient></defs><circle class="track" cx="60" cy="60" r="55"/><circle class="bar" id="qrBar" cx="60" cy="60" r="55"/></svg><b id="qrPct">0%</b></div>'+
+    '<h3>本轮挑战完成！</h3><p>'+esc(msg)+'</p>'+
+    '<div class="qr-stats"><div class="s ok"><b>'+quizState.correct+'</b><span>答对</span></div><div class="s no"><b>'+(total-quizState.correct)+'</b><span>答错</span></div><div class="s"><b>'+total+'</b><span>总题数</span></div></div>'+
+    '<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">'+
+    '<button class="btn btn-ghost" onclick="openQuiz(\''+lang+'\')">重新挑战</button>'+
+    '<a class="btn btn-accent" href="#/lang/'+lang+'">返回课程</a></div></div>';
+  const bar=$('#qrBar'),pctEl=$('#qrPct');
+  requestAnimationFrame(()=>{bar.style.strokeDashoffset=345.6*(1-pct/100);pctEl.textContent=pct+'%';});
+}
+
+/* ================= 练习场 ================= */
+/* type:'code' 用户写函数、浏览器真实运行判题（python=Pyodide, js=eval）
+   type:'io'   用户写出预期输出、自动比对（java/cpp/go 用，无需运行时） */
+const PRACTICE={
+python:[
+{t:'反转字符串',fn:'reverse_str',desc:`写一个函数 <code>reverse_str(s)</code>，接收一个字符串，返回<strong>反过来的字符串</strong>。例如传入 "hello"，返回 "olleh"。`,starter:'def reverse_str(s):\n    # 在这里写你的代码\n    pass',hint:'提示：字符串切片 s[::-1] 可以一行搞定；也可以用循环或 reversed()。',tests:[{args:['hello'],want:'olleh'},{args:['abc'],want:'cba'},{args:['a'],want:'a'}]},
+{t:'判断偶数',fn:'is_even',desc:`写一个函数 <code>is_even(n)</code>，返回 <code>True</code> 表示 n 是偶数，<code>False</code> 表示奇数。`,starter:'def is_even(n):\n    # 在这里写你的代码\n    pass',hint:'提示：n % 2 == 0 时是偶数。',tests:[{args:[4],want:true},{args:[7],want:false},{args:[0],want:true}]},
+{t:'三个数取最大',fn:'max_of',desc:`写一个函数 <code>max_of(a, b, c)</code>，返回三个数中<strong>最大的那个</strong>。`,starter:'def max_of(a, b, c):\n    # 在这里写你的代码\n    pass',hint:'提示：内置函数 max(a, b, c) 直接返回最大值；也可以用 if 比较。',tests:[{args:[1,5,3],want:5},{args:[9,2,4],want:9},{args:[-1,-5,-3],want:-1}]},
+{t:'数一数元音字母',fn:'count_vowels',desc:`写一个函数 <code>count_vowels(s)</code>，返回字符串 s 中<strong>元音字母的个数</strong>（a/e/i/o/u，不区分大小写）。`,starter:'def count_vowels(s):\n    # 在这里写你的代码\n    pass',hint:'提示：先把 s 转成小写，再逐个字符判断 in "aeiou"，计数器累加。',tests:[{args:['hello'],want:2},{args:['AEIOU'],want:5},{args:['xyz'],want:0}]},
+{t:'求列表平均值',fn:'avg',desc:`写一个函数 <code>avg(nums)</code>，返回列表中所有数字的平均值。测试保证列表非空。`,starter:'def avg(nums):\n    # 在这里写你的代码\n    pass',hint:'提示：sum(nums) / len(nums)。',tests:[{args:[[1,2,3]],want:2.0},{args:[[10,20]],want:15.0},{args:[[5,5,5,5]],want:5.0}]},
+{t:'FizzBuzz',fn:'fizzbuzz',desc:`写一个函数 <code>fizzbuzz(n)</code>，返回一个列表：从 1 到 n，3 的倍数写 "Fizz"，5 的倍数写 "Buzz"，<strong>同时</strong>是 3 和 5 的倍数写 "FizzBuzz"，其他位置写数字本身。`,starter:'def fizzbuzz(n):\n    # 在这里写你的代码\n    result = []\n    pass',hint:'提示：先用 if i%15==0 判断 15 的倍数，再判断 3、5 的倍数，最后 else 放 i。',tests:[{args:[5],want:[1,2,'Fizz',4,'Buzz']},{args:[15],want:[1,2,'Fizz',4,'Buzz','Fizz',7,8,'Fizz','Buzz',11,'Fizz',13,14,'FizzBuzz']}]},
+{t:'判断回文',fn:'is_palindrome',desc:`写一个函数 <code>is_palindrome(s)</code>，如果字符串正反读都一样（回文），返回 <code>True</code>，否则返回 <code>False</code>。`,starter:'def is_palindrome(s):\n    # 在这里写你的代码\n    pass',hint:'提示：比较 s 和它的反转 s[::-1] 是否相等。',tests:[{args:['abcba'],want:true},{args:['hello'],want:false},{args:['aa'],want:true}]},
+{t:'第二大的数',fn:'second_largest',desc:`写一个函数 <code>second_largest(nums)</code>，返回列表中<strong>第二大的不同元素</strong>。测试保证至少有两个不同元素。`,starter:'def second_largest(nums):\n    # 在这里写你的代码\n    pass',hint:'提示：先转成 set 去重，转列表排序，取倒数第二个。',tests:[{args:[[1,3,2]],want:2},{args:[[9,2,7,3]],want:7},{args:[[5,5,1]],want:1}]}
+],
+js:[
+{t:'打招呼',fn:'greet',desc:`写一个函数 <code>greet(name)</code>，返回字符串 "你好，" 加上传入的名字。例如 <code>greet("小明")</code> 返回 "你好，小明"。`,starter:'function greet(name) {\n  // 在这里写你的代码\n}',hint:'提示：用 + 拼接字符串，或模板字符串 `你好，${name}`。',tests:[{args:['小明'],want:'你好，小明'},{args:['World'],want:'你好，World'}]},
+{t:'数组翻倍',fn:'double',desc:`写一个函数 <code>double(nums)</code>，返回一个新数组，里面每个元素是原数组对应元素的 2 倍。<strong>不要修改原数组。</strong>`,starter:'function double(nums) {\n  // 在这里写你的代码\n}',hint:'提示：nums.map(n => n * 2) 一步到位。',tests:[{args:[[1,2,3]],want:[2,4,6]},{args:[[10,0,-5]],want:[20,0,-10]}]},
+{t:'数组求和',fn:'sumList',desc:`写一个函数 <code>sumList(nums)</code>，返回数组中所有数字的总和。`,starter:'function sumList(nums) {\n  // 在这里写你的代码\n}',hint:'提示：循环累加，或 nums.reduce((a,b)=>a+b, 0)。',tests:[{args:[[1,2,3]],want:6},{args:[[5,5]],want:10},{args:[[]],want:0}]},
+{t:'最长的单词',fn:'longestWord',desc:`写一个函数 <code>longestWord(sentence)</code>，返回句子中<strong>最长的那个单词</strong>（按空格切分）。`,starter:'function longestWord(sentence) {\n  // 在这里写你的代码\n}',hint:'提示：sentence.split(" ") 切开，再用 reduce 比较长度。',tests:[{args:['I love JavaScript'],want:'JavaScript'},{args:['a bb ccc'],want:'ccc'}]},
+{t:'筛出成年人',fn:'filterAdult',desc:`写一个函数 <code>filterAdult(ages)</code>，返回一个新数组，只保留年龄 <code>&gt;= 18</code> 的元素。`,starter:'function filterAdult(ages) {\n  // 在这里写你的代码\n}',hint:'提示：ages.filter(a => a >= 18)。',tests:[{args:[[16,25,30,17]],want:[25,30]},{args:[[5,10]],want:[]}]}
+],
+java:[
+{t:'猜输出：自增加和',type:'io',code:`int x = 5;
+x += 3;
+System.out.println(x);`,desc:`阅读下面这段 Java 代码，写出它在控制台打印的<strong>完整输出</strong>。`,want:'8',hint:'x += 3 就是 x = x + 3，5+3=8，println 会换行输出 8。'},
+{t:'猜输出：增强 for 循环',type:'io',code:`int[] a = {1, 2, 3};
+for (int v : a) {
+    System.out.print(v * 10);
+}`,desc:`阅读下面这段 Java 代码，写出它在控制台打印的<strong>完整输出</strong>。注意 print 不换行。`,want:'102030',hint:'循环依次取 1、2、3，分别打印 10、20、30，连起来就是 102030。'},
+{t:'猜输出：字符串变大写',type:'io',code:`String s = "hi";
+String t = s.toUpperCase();
+System.out.println(t);`,desc:`阅读下面这段 Java 代码，写出它在控制台打印的<strong>完整输出</strong>。`,want:'HI',hint:'toUpperCase() 返回全大写的新字符串，原 s 不变；t 是 "HI"。'}
+],
+cpp:[
+{t:'猜输出：取余运算',type:'io',code:`int x = 7;
+x = x % 3;
+cout << x;`,desc:`阅读下面这段 C++ 代码，写出它在控制台打印的<strong>完整输出</strong>。`,want:'1',hint:'7 除以 3 余 1（3×2=6，7-6=1），% 是取余。'},
+{t:'猜输出：三目表达式',type:'io',code:`int a = 2, b = 5;
+cout << (a > b ? a : b);`,desc:`阅读下面这段 C++ 代码，写出它在控制台打印的<strong>完整输出</strong>。`,want:'5',hint:'a>b 即 2>5 不成立，取冒号右边的值 b=5。'},
+{t:'猜输出：字符串长度',type:'io',code:`string s = "abc";
+cout << s.length();`,desc:`阅读下面这段 C++ 代码，写出它在控制台打印的<strong>完整输出</strong>。`,want:'3',hint:'字符串 "abc" 有 3 个字符，length() 返回字符数 3。'}
+],
+go:[
+{t:'猜输出：乘法赋值',type:'io',code:`x := 5
+x *= 2
+fmt.Println(x)`,desc:`阅读下面这段 Go 代码，写出它在控制台打印的<strong>完整输出</strong>。`,want:'10',hint:'x *= 2 即 x = x * 2，5×2=10，Println 输出 10 并换行。'},
+{t:'猜输出：计数循环',type:'io',code:`for i := 0; i < 3; i++ {
+    fmt.Print(i)
+}`,desc:`阅读下面这段 Go 代码，写出它在控制台打印的<strong>完整输出</strong>。`,want:'012',hint:'i 从 0 到 2，Print 不换行，依次打印 0、1、2。'}
+]
+};
+Object.keys(PRACTICE).forEach(id=>{const p=lp(id);if(!p.practice)p.practice={};});
+
+let pracState={lang:'python',idx:0};
+function pracProg(lang){const p=lp(lang);if(!p.practice)p.practice={};return p.practice;}
+function renderPractice(lang){
+  pracState.lang=lang;pracState.idx=0;
+  drawPractice();
+}
+function drawPractice(){
+  const lang=pracState.lang,m=LANG_META[lang],list=PRACTICE[lang],pi=pracProg(lang);
+  const head='<div class="lesson-head"><a class="back" href="#/lang/'+lang+'">← 返回 '+m.name+'</a><div class="lesson-meta"><span class="tag" style="background:color-mix(in srgb,'+m.color+' 12%,white);color:'+m.color+'">'+m.name+'</span><span>动手练习</span></div></div>';
+  const items=list.map((p,i)=>'<div class="prac-item'+(pi[i]?' done':'')+(i===pracState.idx?' active':'')+'" onclick="selPractice('+i+')"><span class="tick"></span><span>'+esc(p.t)+'</span></div>').join('');
+  const p=list[pracState.idx];
+  const isIo=p.type==='io';
+  const code=p.type==='io'?'':(p.starter||'');
+  const main=
+    '<div class="prac-card">'+
+      '<h3>'+(pracState.idx+1)+'. '+esc(p.t)+'</h3>'+
+      '<div class="prac-desc">'+p.desc+'</div>'+
+      (p.code?'<div class="q-code" style="margin-top:14px"><div class="qc-bar">'+esc(m.name)+'</div><pre>'+highlight(p.code,lang)+'</pre></div>':'')+
+      '<button class="btn btn-ghost" style="margin-top:12px;padding:7px 14px;font-size:13px" onclick="document.getElementById(\'pracHint\').classList.toggle(\'show\')">看提示</button>'+
+      '<div class="prac-hint" id="pracHint"><b>提示：</b>'+esc(p.hint||'')+'</div>'+
+    '</div>'+
+    (isIo
+      ?'<div class="editor-shell"><div class="editor-bar"><span class="dots"><i></i><i></i><i></i></span>你的输出结果</div><textarea class="code-editor" id="pracEditor" style="min-height:110px" placeholder="在这里写出你认为程序会打印什么..." spellcheck="false"></textarea></div>'
+      :'<div class="editor-shell"><div class="editor-bar"><span class="dots"><i></i><i></i><i></i></span>'+esc(p.fn)+' · '+esc(m.name)+'</div><textarea class="code-editor" id="pracEditor" spellcheck="false">'+esc(code)+'</textarea></div>')+
+    '<div class="prac-actions">'+
+      '<button class="btn btn-accent" id="runBtn" onclick="runPractice()">▶ 运行并判题</button>'+
+      '<button class="btn btn-ghost" onclick="resetPractice()">重置代码</button>'+
+      '<span class="run-status" id="runStatus"></span>'+
+    '</div>'+
+    '<div class="term" id="pracTerm" style="display:none"></div>'+
+    '<div id="pracTests" style="margin-top:8px"></div>';
+  $('#view-practice').innerHTML=head+'<div class="prac-wrap"><div class="prac-list"><h4>练习清单（'+Object.keys(pi).length+'/'+list.length+' 已通过）</h4>'+items+'</div><div class="prac-main">'+main+'</div></div>';
+  // 恢复上次代码
+  const saved=localStorage.getItem('codecamp_prac_'+lang+'_'+pracState.idx);
+  if(saved!==null)$('#pracEditor').value=saved;
+  // tab 键支持
+  $('#pracEditor').addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();const el=e.target,s=el.selectionStart;el.value=el.value.slice(0,s)+'    '+el.value.slice(el.selectionEnd);el.selectionStart=el.selectionEnd=s+4;}});
+  $('#pracEditor').addEventListener('input',e=>{localStorage.setItem('codecamp_prac_'+lang+'_'+pracState.idx,e.target.value);});
+}
+function selPractice(i){pracState.idx=i;drawPractice();}
+function resetPractice(){const p=PRACTICE[pracState.lang][pracState.idx];$('#pracEditor').value=p.type==='io'?'':(p.starter||'');localStorage.removeItem('codecamp_prac_'+pracState.lang+'_'+pracState.idx);}
+function fmtLit(v){if(typeof v==='string')return '"'+v+'"';if(Array.isArray(v))return '['+v.map(fmtLit).join(', ')+']';if(v===true)return 'true';if(v===false)return 'false';return String(v);}
+function deepEq(a,b){if(Array.isArray(a)&&Array.isArray(b)){if(a.length!==b.length)return false;return a.every((x,i)=>deepEq(x,b[i]));}return a===b;}
+
+let pyodideP=null,pyodideLoading=null;
+function ensurePyodide(){
+  if(pyodideP)return Promise.resolve(pyodideP);
+  if(pyodideLoading)return pyodideLoading;
+  setRunStatus('首次运行需要加载 Python 运行时（约 10MB），请稍候…');
+  pyodideLoading=new Promise((res,rej)=>{
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/pyodide/v0.27.2/full/pyodide.js';
+    s.onload=async()=>{try{pyodideP=await window.loadPyodide({indexURL:'https://cdn.jsdelivr.net/pyodide/v0.27.2/full/'});res(pyodideP);}catch(e){rej(e);}};
+    s.onerror=()=>rej(new Error('Pyodide 加载失败，请检查网络'));
+    document.head.appendChild(s);
+  });
+  return pyodideLoading;
+}
+function setRunStatus(t){$('#runStatus').textContent=t||'';}
+function showTerm(html){const el=$('#pracTerm');el.style.display='block';el.innerHTML=html;}
+
+async function runPractice(){
+  const lang=pracState.lang,p=PRACTICE[lang][pracState.idx],code=$('#pracEditor').value.trim();
+  const runBtn=$('#runBtn');runBtn.disabled=true;setRunStatus('运行中…');
+  try{
+    if(p.type==='io'){
+      const got=code,want=p.want;
+      const norm=s=>s.trim().replace(/\s+/g,' ');
+      const pass=norm(got)===norm(want);
+      showTerm('<span class="t-dim">你的输出：</span>'+esc(got||'(空)')+'\n<span class="t-dim">预期输出：</span>'+esc(want));
+      $('#pracTests').innerHTML='<div class="test-row '+(pass?'pass':'fail')+'"><span class="ico">'+(pass?'✓':'✕')+'</span><div>'+(pass?'<b style="color:var(--ok)">完全正确！</b> 输出和预期一致。':'<b style="color:var(--err)">还不对。</b> 再看看题目，预期输出是：<span class="want">'+esc(want)+'</span>')+'</div></div>';
+      if(pass){markPracticeDone();}
+      setRunStatus(pass?'通过！':'未通过，再试一次');
+      return;
+    }
+    if(lang==='python'){
+      await ensurePyodide();
+      const lit=v=>{if(typeof v==='string')return "'"+v.replace(/\\/g,'\\\\').replace(/'/g,"\\'")+"'";if(Array.isArray(v))return '['+v.map(lit).join(', ')+']';if(v===true)return 'True';if(v===false)return 'False';return String(v);};
+      let testCode='';
+      p.tests.forEach((t,i)=>{
+        testCode+='    _r={}\n';
+        testCode+='    _expr='+p.fn+'('+t.args.map(lit).join(', ')+')\n';
+        testCode+='    _r["expr"]="'+p.fn+'('+t.args.map(lit).join(', ')+')"\n';
+        testCode+='    _r["got"]=_expr\n';
+        testCode+='    _r["want"]='+lit(t.want)+'\n';
+        testCode+='    _r["pass"]=(_expr=='+lit(t.want)+')\n';
+        testCode+='    _results.append(_r)\n';
+      });
+      const full='import sys, io, json\n_buf=io.StringIO()\n_old=sys.stdout\nsys.stdout=_buf\n_results=[]\n__result__=""\n'+
+        'try:\n'+
+        code.split('\n').map(l=>'    '+l).join('\n')+'\n'+
+        '    sys.stdout=_old\n'+
+        testCode+
+        '    __result__=json.dumps({"out":_buf.getvalue(),"tests":_results})\n'+
+        'except Exception as _e:\n'+
+        '    sys.stdout=_old\n'+
+        '    __result__=json.dumps({"out":_buf.getvalue(),"error":type(_e).__name__+": "+str(_e)})\n';
+      const raw=pyodideP.runPython(full+'\n__result__');
+      const data=JSON.parse(raw);
+      renderPracticeResult(p,data);
+    }else if(lang==='js'){
+      const logs=[];
+      const fakeConsole={log:(...a)=>logs.push(a.map(x=>typeof x==='object'?JSON.stringify(x):String(x)).join(' '))};
+      let api=null,evalErr=null;
+      try{
+        api=new Function('console',code+'\n; return { f: '+p.fn+' };')(fakeConsole);
+      }catch(e){evalErr=e;}
+      const data={out:logs.join('\n'),tests:[],error:evalErr?evalErr.message:null};
+      if(!evalErr){
+        for(const t of p.tests){
+          let got,err=null,ok=true;
+          try{got=api.f.apply(null,t.args);}catch(e){ok=false;err=e.message;}
+          data.tests.push({expr:p.fn+'('+t.args.map(fmtLit).join(', ')+')',got,want:t.want,pass:ok&&deepEq(got,t.want),err});
+        }
+      }
+      renderPracticeResult(p,data);
+    }else{
+      setRunStatus('该语言暂不支持在线运行');
+    }
+  }catch(e){
+    showTerm('<span class="t-err">运行出错：'+esc(String(e.message||e))+'</span>');
+    setRunStatus('运行失败');
+  }finally{
+    runBtn.disabled=false;
+  }
+}
+function renderPracticeResult(p,data){
+  if(data.error){
+    showTerm('<span class="t-err">'+esc(data.error)+'</span>'+(data.out?'\n<span class="t-dim">你的输出：</span>\n'+esc(data.out):''));
+    setRunStatus('代码报错了');
+    $('#pracTests').innerHTML='';
+    return;
+  }
+  const allPass=data.tests.length&&data.tests.every(t=>t.pass);
+  let termHtml='';
+  if(data.out)termHtml+='<span class="t-dim">--- 你的程序输出 ---</span>\n'+esc(data.out);
+  showTerm(termHtml||'<span class="t-dim">（没有控制台输出）</span>');
+  $('#pracTests').innerHTML=data.tests.map(t=>{
+    if(t.err)return '<div class="test-row fail"><span class="ico">✕</span><div><span class="expr">'+esc(t.expr)+'</span><br><span class="t-err" style="font-family:var(--mono)">抛异常：'+esc(t.err)+'</span></div></div>';
+    return '<div class="test-row '+(t.pass?'pass':'fail')+'"><span class="ico">'+(t.pass?'✓':'✕')+'</span><div><span class="expr">'+esc(t.expr)+'</span>'+(t.pass?'<br><span class="t-ok">返回 '+esc(fmtLit(t.got))+'，正确</span>':'<br>返回 <span class="got">'+esc(fmtLit(t.got))+'</span>，预期 <span class="want">'+esc(fmtLit(t.want))+'</span>')+'</div></div>';
+  }).join('');
+  setRunStatus(allPass?'全部通过！':'有 '+data.tests.filter(t=>!t.pass).length+' 个用例没通过');
+  if(allPass)markPracticeDone();
+}
+function markPracticeDone(){
+  const lang=pracState.lang;
+  if(!pracProg(lang)[pracState.idx]){pracProg(lang)[pracState.idx]=true;save();toast('练习通过，已记录进度');}
+}
+
+/* ================= 启动 ================= */
+router();
+</script>
+</body>
+</html>
